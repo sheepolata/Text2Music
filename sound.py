@@ -6,6 +6,9 @@ import numpy as np
 
 import notesfreqs as nf
 
+#Note frequencies website
+#http://pages.mtu.edu/~suits/notefreqs.html
+
 class SoundHandlerFrequences(object):
     """docstring for SoundHandlerFrequences"""
     def __init__(self):
