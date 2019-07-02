@@ -45,8 +45,10 @@ import file
 #PySynth Handling class
 class SoundPySynth(object):
     """docstring for SoundPySynth"""
-    def __init__(self, octave=4):
+    def __init__(self, octave=4, bpm=180, generation_type="chain"):
         super(SoundPySynth, self).__init__()
+        self.bpm = bpm
+        self.generation_type = generation_type
 
         self.min_octave = 2
         self.max_octave = 6
@@ -167,27 +169,24 @@ class SoundPySynth(object):
 
         return tuple(song)
 
-    def generate_wav(self, values, length, generation="base", filepath="out.wav", bpm=180, version="a"):
-        if generation == "chain":
+    def generate_wav(self, values, length, version='a', filepath="out"):
+        if self.generation_type == "chain":
             song = self.generate_song_chain(values, length)
         else:
             song = self.generate_song(values, length)
         if version == "a":
-            psa.make_wav(song, fn = filepath, bpm = bpm)
+            psa.make_wav(song, fn = filepath + "_flute.wav", bpm = self.bpm)
         elif version == "b":
-            psb.make_wav(song, fn = filepath, bpm = bpm)
+            psb.make_wav(song, fn = filepath + "_piano.wav", bpm = self.bpm)
         elif version == "c":
-            psc.make_wav(song, fn = filepath, bpm = bpm)
+            psc.make_wav(song, fn = filepath + "_bowed.wav", bpm = self.bpm)
         elif version == "d":
-            psd.make_wav(song, fn = filepath, bpm = bpm)
+            psd.make_wav(song, fn = filepath + "_woodwind.wav", bpm = self.bpm)
         elif version == "e":
-            pse.make_wav(song, fn = filepath, bpm = bpm)
+            pse.make_wav(song, fn = filepath + "_rhodes.wav", bpm = self.bpm)
         elif version == "p":
-            psp.make_wav(song, fn = filepath, bpm = bpm)
+            psp.make_wav(song, fn = filepath + "_percs.wav", bpm = self.bpm)
         elif version == "s":
-            pss.make_wav(song, fn = filepath, bpm = bpm)
+            pss.make_wav(song, fn = filepath + "_strings.wav", bpm = self.bpm)
         else:
-            psa.make_wav(song, fn = filepath, bpm = bpm)
-
-
-
+            psa.make_wav(song, fn = filepath + ".wav", bpm = self.bpm)
