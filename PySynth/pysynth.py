@@ -128,8 +128,9 @@ def make_wav(song,bpm=120,transpose=0,pause=.05,boost=1.1,repeat=0,fn="out.wav",
 	ex_pos = 0.
 	for rp in range(repeat+1):
 		for nn, x in enumerate(song):
-			if not nn % 4 and silent == False:
-				print("[%u/%u]\t" % (nn+1,len(song)))
+			if not silent:
+				print("[{0}/{1}] Busy making magic happen...\r".format(nn+1,len(song)), end='', flush=True)
+				# print("[%u/%u]\t" % (nn+1,len(song)))
 			if x[0]!='r':
 				if x[0][-1] == '*':
 					vol = boost

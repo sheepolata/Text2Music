@@ -53,13 +53,8 @@ class SoundHandlerFrequences(object):
         last_display = ""
         for note in range(len(freqs)):
             disp = ">> " + nf.dict_freqs2notes[nf.list_note2freqs[freqs[note]]] + " - " + str(round((float(note)/(float(len(freqs))))*100, 2)) + "% (" + to_display[note] + ")"
-            #Flush the last line
-            sys.stdout.write(' ' * len(last_display) + '\r')
-            #Write to display the current line
-            sys.stdout.write("{0}\r".format(disp))
-
+            print("{0}\r".format(disp), end='', flush=True)
             last_display = disp
-
             self.play_tune(nf.list_note2freqs[freqs[note]], durations[note])
 
         sys.stdout.write("{0}\r".format('\n'))
