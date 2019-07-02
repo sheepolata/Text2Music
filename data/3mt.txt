@@ -1,0 +1,15 @@
+We all know Science Fiction in a way or another. In books, in movies, in video games, its everywhere. 
+And for those who are fans of SciFi, have you ever dreamt about having multiple robots come together to grow into bigger robots? 
+Sounds like a childs dream, right?
+Well, my project is about making that dream a reality. At least making a step forward that dream.
+Lets start with the basics. To create a swarm of self-organising robots, I studied several fields.
+First, morphogenesis, which is the biological process of shape development in an organism, to understand how cells manage to grow and arrange themselves into amazingly complex structures like us, humans.
+Then Complex Systems, which is the study of systems composed of large number of similar entities and their behaviour emerging from the large number of interactions between those entities. This include for instance studies of how flocks of bird move, but also why traffic forms on roads.
+Morphogenesis and complex systems inspired Morphogenetic Engineering, which is focused on systems capable of organising themselves in a non-random and controlled way.
+But the butter to the bread of my project are obviously robots. Collective robotics to be more precise. 
+Using first a simulation and then a swarm of small robots called PsiSwarms, built in the robotics lab of York, I designed a local behaviour, the same for all robots that allow them to flock together into specific spatial formations. Essentially, I meta-designed the swarm behaviour by designing their local behaviour and interactions.
+The main challenge of my project is to implement those behaviours in the real robots by crossing the reality gap, the difference between the theory of a simulation and the complexity and unpredictability of the real world. Even the most complex simulations cant take everything into account and going from the ideal world of simulation to the real one is very challenging.
+My project wont have a direct impact on on our lives, but, in a not-so-far future, it will help and improve the usage of robots in a variety of areas, from construction work to research and rescue missions.
+In a further future, we could even imagine nano-robots using Morphogenetic Engineering to self-assemble into very complex multi-robot organisms capable of many tasks.
+So, lets hope the reality gap wont be to wide for us to go into the future.
+Thank you.
