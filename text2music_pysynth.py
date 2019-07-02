@@ -40,6 +40,8 @@ import file
 # # Beats per minute (bpm) is really quarters per minute here
 # psb.make_wav(song, fn = "danube.wav", leg_stac = .7, bpm = 180)
 
+
+#PySynth Handling class
 class SoundPySynth(object):
     """docstring for SoundPySynth"""
     def __init__(self, octave=4):
