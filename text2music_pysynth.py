@@ -48,7 +48,10 @@ class SoundPySynth(object):
     def __init__(self, octave=4):
         super(SoundPySynth, self).__init__()
 
-        self.octave = octave
+        self.min_octave = 2
+        self.max_octave = 6
+        # self.octave = octave
+        self.octave = max(self.min_octave, min(octave, self.max_octave))
 
         self.initialise_notes()
 
@@ -61,9 +64,9 @@ class SoundPySynth(object):
         _notes = ["c", "d", "e", "f", "g", "a", "b"]
         self.notes = []
         for n in _notes:
-            self.notes.append(n + "b" + str(self.octave))
+            # self.notes.append(n + "b" + str(self.octave))
             self.notes.append(n + str(self.octave))
-            self.notes.append(n + "#" + str(self.octave))
+            # self.notes.append(n + "#" + str(self.octave))
 
     def generate_song(self, values, length):
         song = []
@@ -89,7 +92,7 @@ class SoundPySynth(object):
 
         return tuple(song)
 
-    def generate_song_chain(self, values, length):
+    def generate_song_chain(self, values, length, return_chance=0.00):
         song = []
 
         duration_index_max = float(len(self.possible_durations) - 1)
@@ -102,8 +105,10 @@ class SoundPySynth(object):
         len_max = float(max(length))
 
         current_note_index = np.random.randint(0, len(self.notes))
-        initial_note       = self.notes[current_note_index]
-        print("init", current_note_index)
+        initial_octave = self.octave
+        initial_note_index = current_note_index
+        initial_note       = self.notes[initial_note_index]
+        # print("init", current_note_index)
 
         initial_duration = np.random.choice(self.possible_durations)
 
@@ -127,14 +132,25 @@ class SoundPySynth(object):
             else:
                 current_note_index = current_note_index + sign*2
 
-            if current_note_index > len(self.notes)-1:
-                current_note_index = current_note_index%(len(self.notes)-1)
-                self.octave += 1
+            if np.random.random() < return_chance:
+                print("RETURN", i)
+                current_note_index = initial_note_index
+                self.octave = initial_octave
                 self.initialise_notes()
+            elif current_note_index > len(self.notes)-1:
+                if self.octave < self.max_octave:
+                    current_note_index = current_note_index%(len(self.notes)-1)
+                    self.octave += 1
+                    self.initialise_notes()
+                else:
+                    current_note_index = len(self.notes)-1
             elif current_note_index < 0:
-                current_note_index = len(self.notes)-1 + current_note_index
-                self.octave -= 1
-                self.initialise_notes()
+                if self.octave > self.min_octave:
+                    current_note_index = len(self.notes)-1 + current_note_index
+                    self.octave -= 1
+                    self.initialise_notes()
+                else:
+                    current_note_index = 0
 
             # print(current_note_index, " ", self.octave)
 
@@ -145,6 +161,8 @@ class SoundPySynth(object):
             prev_value = curr_value
             prev_len = curr_len
 
+        # for s in song:
+        #     print(s)
         # song[len(song)-1] = (song[len(song)-1][0], 0.5)
 
         return tuple(song)
@@ -195,7 +213,7 @@ def main():
     # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), generation="chain", filepath=output_file+"channel_woodwind.wav", bpm=230, version="d")
     # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), generation="chain", filepath=output_file+"channel_rhodes.wav", bpm=230, version="e")
     # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), generation="chain", filepath=output_file+"channel_percs.wav", bpm=230, version="p")
-    # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), generation="chain", filepath=output_file+"channel_strings.wav", bpm=180, version="s")
+    song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), generation="chain", filepath=output_file+"channel_strings.wav", bpm=180, version="s")
 
     '''
     Join wav files together (one after the other)
