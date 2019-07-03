@@ -1,0 +1,46 @@
+{
+    ".": {
+        "I": 2
+    },
+    "I": {
+        "am": 2,
+        "create": 1
+    },
+    "MMU": {
+        ".": 1
+    },
+    "PhD": {
+        "student": 1
+    },
+    "Pouyan": {
+        ".": 1
+    },
+    "am": {
+        "PhD": 1,
+        "Pouyan": 1
+    },
+    "articifial": {
+        "intelligence": 1
+    },
+    "at": {
+        "MMU": 1
+    },
+    "computing": {
+        "at": 1
+    },
+    "create": {
+        "articifial": 1
+    },
+    "in": {
+        "computing": 1
+    },
+    "intelligence": {
+        "solution": 1
+    },
+    "solution": {
+        ".": 1
+    },
+    "student": {
+        "in": 1
+    }
+}

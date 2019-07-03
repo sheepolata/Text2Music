@@ -18,16 +18,23 @@ class TextFileToMusic(object):
 
         #Remove ponctuation
         exclude = set(string.punctuation)
-        self.content = ''.join(ch for ch in self.content if ch not in exclude)
+        self.content = ''.join(ch for ch in self.raw_content if ch not in exclude)
         self.content = self.content.lower()
 
         self.words = self.content.split()
 
         self.markov = {}
 
+        self.ponct_after  = ['.',',','?','!',':',';',']','}','\''] #['.',',','?','!',':',';',')',']','}']
+        self.ponct_before = ['{','[','('] #['(','[','{']
+
+        self.markov_seed = -1
+
     def computeMarkovChain(self):
 
         try:
+            if self.reloadmarkov:
+                raise Exception('Reload Markov forced') 
             with open("./data/markovchains/" + self.title + "_markovchain.json", 'r') as fp:
                 print("Load Markov Chain from " + "./data/markovchains/" + self.title + "_markovchain.json\r", end='', flush=True)
                 self.markov = js.load(fp)
@@ -38,24 +45,23 @@ class TextFileToMusic(object):
             # print(self.raw_content)
             # print(raw_words)
 
-            ponct_after  = ['.',',','?','!',':',';',']','}','\''] #['.',',','?','!',':',';',')',']','}']
-            ponct_before = ['{','[','('] #['(','[','{']
+            
 
             j = 0.0
             for w in raw_words:
                 print("Fixing Raw content... {0}%\r".format(round(((j/float(len(raw_words)))*100.0), 2)), end='', flush=True)
                 j += 1.0
                 # if any((c in ponct_after) for c in w) and len(w) > 1:
-                if any((c in w) for c in ponct_before) and len(w) > 1:
-                    if w[0] not in ponct_before:
+                if any((c in w) for c in self.ponct_before) and len(w) > 1:
+                    if w[0] not in self.ponct_before:
                         continue
                     i = raw_words.index(w)
                     del raw_words[i]
                     raw_words.insert(i, w[0])
                     raw_words.insert(i+1, w[1:])
                 # elif any((c in ponct_before) for c in w) and len(w) > 1:
-                elif any((c in w) for c in ponct_after) and len(w) > 1:
-                    if w[-1] not in ponct_after:
+                elif any((c in w) for c in self.ponct_after) and len(w) > 1:
+                    if w[-1] not in self.ponct_after:
                         continue
                     i = raw_words.index(w)
                     del raw_words[i]
@@ -91,7 +97,15 @@ class TextFileToMusic(object):
 
             # pprint(self.markov)
 
-    def generateTextFromMarkov(self, length=500):
+    def generateTextFromMarkov(self, length=100):
+        self.computeMarkovChain()
+
+        if self.markov_seed < 0:
+            import time
+            self.markov_seed = int(time.time())
+
+        np.random.seed(self.markov_seed)
+
         gen_txt = []
 
         first = np.random.choice(list(self.markov.keys()))
@@ -114,17 +128,15 @@ class TextFileToMusic(object):
         print("Generating text... {0}% - done\r".format(round((float(i+1)/float(length))*100.0, 2)), end='', flush=True)
         print('')
 
-        ponct_after  = ['.',',','?','!',':',';',')',']','}']
-        ponct_before = ['(','[','{']
         lres = []
         res = ""
         j = 0.0
         for w in gen_txt:
             print("Fix generated text... {0}%\r".format(round((float(j)/float(len(gen_txt)))*100.0, 2)), end='', flush=True)
             j += 1.0
-            if w in ponct_before:
+            if w in self.ponct_before:
                     res += w
-            if w in ponct_after:
+            if w in self.ponct_after:
                 res = res[:-1]
                 if w == '.':
                     # res += w + '\n'
@@ -138,7 +150,25 @@ class TextFileToMusic(object):
         print('')
         # print(lres)
 
+        np.random.seed(None)
+
         return lres
+
+    def wordListFromMarkov(self, length=100):
+        line_list = self.generateTextFromMarkov(length)
+        
+        as_string = ""
+        wlist = []
+
+        for i, line in enumerate(line_list):
+            as_string += line + " "
+            
+        #Remove ponctuation
+        exclude = set(string.punctuation)
+        as_string = ''.join(ch for ch in as_string if ch not in exclude)
+        as_string = as_string.lower()
+
+        return (as_string.split(), line_list)
 
 
     def get_word_value(self, word, f="mean"):
@@ -164,25 +194,29 @@ class TextFileToMusic(object):
             res += ord(word[c])
         return res
 
-    def get_words_values(self, f="mean"):
+    def get_words_values(self, f="mean", words=[]):
+        if words == []:
+            words = self.words
         res = []
-        for w in self.words:
+        for w in words:
             res.append(self.get_word_value(w, f))
         return res
 
-    def get_duration_factors(self, f="len"):
+    def get_duration_factors(self, f="len", words=[]):
+        if words == []:
+            words = self.words
         if f == "len":
-            return self.get_words_length()
+            return self.get_words_length(words)
         elif f == "addition":
-            return self.get_words_values(f=f)
+            return self.get_words_values(f=f, words=words)
         elif f == "mean":
-            return self.get_words_values(f=f)
+            return self.get_words_values(f=f, words=words)
         else:
-            return self.get_words_length()
+            return self.get_words_length(words=words)
 
-    def get_words_length(self):
+    def get_words_length(self, words):
         res = []
-        for w in self.words:
+        for w in words:
             res.append(len(w))
         return res
 
@@ -261,16 +295,18 @@ class TextFileToMusic(object):
         # return int(v)
         # return candidates[len(self.title) % len(candidates)]
 
-    def get_params(self, bpm, instrument, generator, octave, usetitle):
+    def get_params(self, bpm, instrument, generator, octave, markov, markovseed, usetitle, reloadmarkov):
+        self.markov_seed = int(markovseed)
+        self.reloadmarkov = bool(reloadmarkov)
         if usetitle == True:
-            return self._get_bpm(), self._get_instrument(), generator, int(octave)
+            return self._get_bpm(), self._get_instrument(), generator, int(octave), bool(markov), int(markovseed), bool(reloadmarkov)
         else:
-            return int(bpm), instrument, generator, int(octave)
+            return int(bpm), instrument, generator, int(octave), bool(markov), int(markovseed), bool(reloadmarkov)
 
 
 if __name__ == '__main__':
     # f = TextFileToMusic("./data/The Bible.txt", "The Bible")
-    f = TextFileToMusic("./data/The Bible Small.txt", "The Bible Small")
+    f = TextFileToMusic("./data/The Bible.txt", "The Bible")
 
     f.computeMarkovChain()
     t = f.generateTextFromMarkov(length = 1000)

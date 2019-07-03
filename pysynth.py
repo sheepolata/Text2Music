@@ -100,6 +100,7 @@ class SoundPySynth(object):
         duration_index_max = float(len(self.possible_durations) - 1)
         note_index_max     = float(len(self.notes) - 1)
 
+        # print(values)
         values_min = float(min(values))
         values_max = float(max(values))
 
@@ -135,7 +136,7 @@ class SoundPySynth(object):
                 current_note_index = current_note_index + sign*2
 
             if np.random.random() < return_chance:
-                print("RETURN", i)
+                # print("RETURN", i)
                 current_note_index = initial_note_index
                 self.octave = initial_octave
                 self.initialise_notes()
@@ -169,24 +170,42 @@ class SoundPySynth(object):
 
         return tuple(song)
 
-    def generate_wav(self, values, length, version='a', filepath="out"):
+    def generate_wav(self, f, version='a', filepath="out", markov=False):
+        ws = f.words
+        if markov:
+            ws, lines = f.wordListFromMarkov()
+            r = open("./output/markov_" + f.title + "_" + str(f.markov_seed) + ".txt", "w", encoding='utf-8')
+            disp_i = 0
+            for i, l in enumerate(lines):
+                disp_i = i
+                print("Write text... {0}%\r".format(round((float(i)/float(len(lines)))*100.0, 2)), end='', flush=True)
+                r.write(l + '\n')
+            print("Write text... {0}% - done\r".format(round((float(disp_i+1)/float(len(lines)))*100.0, 2)), end='', flush=True)
+            print('')
+            print("Results wrote to" + "./output/markov_" + f.title + "_" + str(f.markov_seed) + ".txt")
+
+            r.close()
+
         if self.generation_type == "chain":
-            song = self.generate_song_chain(values, length)
+            song = self.generate_song_chain(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
         else:
-            song = self.generate_song(values, length)
+            song = self.generate_song(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
+
+        txt_markov = "_markov"+str(f.markov_seed) if markov else ""
+
         if version == "a":
-            psa.make_wav(song, fn = filepath + "_flute.wav", bpm = self.bpm)
+            psa.make_wav(song, fn = filepath + "_flute"+txt_markov+".wav", bpm = self.bpm)
         elif version == "b":
-            psb.make_wav(song, fn = filepath + "_piano.wav", bpm = self.bpm)
+            psb.make_wav(song, fn = filepath + "_piano"+txt_markov+".wav", bpm = self.bpm)
         elif version == "c":
-            psc.make_wav(song, fn = filepath + "_bowed.wav", bpm = self.bpm)
+            psc.make_wav(song, fn = filepath + "_bowed"+txt_markov+".wav", bpm = self.bpm)
         elif version == "d":
-            psd.make_wav(song, fn = filepath + "_woodwind.wav", bpm = self.bpm)
+            psd.make_wav(song, fn = filepath + "_woodwind"+txt_markov+".wav", bpm = self.bpm)
         elif version == "e":
-            pse.make_wav(song, fn = filepath + "_rhodes.wav", bpm = self.bpm)
+            pse.make_wav(song, fn = filepath + "_rhodes"+txt_markov+".wav", bpm = self.bpm)
         elif version == "p":
-            psp.make_wav(song, fn = filepath + "_percs.wav", bpm = self.bpm)
+            psp.make_wav(song, fn = filepath + "_percs"+txt_markov+".wav", bpm = self.bpm)
         elif version == "s":
-            pss.make_wav(song, fn = filepath + "_strings.wav", bpm = self.bpm)
+            pss.make_wav(song, fn = filepath + "_strings"+txt_markov+".wav", bpm = self.bpm)
         else:
-            psa.make_wav(song, fn = filepath + ".wav", bpm = self.bpm)
+            psa.make_wav(song, fn = filepath +txt_markov+".wav", bpm = self.bpm)

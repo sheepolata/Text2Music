@@ -9,13 +9,14 @@ def text_2_music(filepath, **params):
     filename = path.splitext(filepath)[0]
     filepath = "./data/" + filepath
     f = file.TextFileToMusic(filepath, filename)
-    bpm, instrument, gen, octave = f.get_params(**params)
+    bpm, instrument, gen, octave, markov, markovseed, reloadmarkov = f.get_params(**params)
 
     output_file = "./output/" + filename + "_"
     s = SoundPySynth(octave=octave, bpm=bpm, generation_type=gen)
 
 
-    song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), filepath=output_file+"channel", version=instrument)
+    # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), filepath=output_file+"channel", version=instrument, markov=markov)
+    song = s.generate_wav(f, filepath=output_file+"channel", version=instrument, markov=markov)
 
     '''
     Join wav files together (one after the other)
@@ -58,6 +59,30 @@ if __name__ == '__main__':
             4,
             'The base octave: [2:6]'
         ),
+        (
+            'm',
+            'markov',
+            False,
+            'Read the input file, construct a markov chain and use this markiv chain to generate the text from which the song will be created'
+        ),
+        (
+            'ms',
+            'markovseed',
+            -1,
+            'Set the random seed for the markov generation process'
+        ),
+        (
+            'ut',
+            'usetitle',
+            True,
+            'Specify if the title/name of the file is used to generate BPM and instrument'
+        ),
+        (
+            'rlm',
+            'reloadmarkov',
+            False,
+            'Force the recomputing of the markov chain'
+        )
     ]
 
     if len(sys.argv) == 1 or '--help' in sys.argv or '-h' in sys.argv:
@@ -71,7 +96,7 @@ if __name__ == '__main__':
         print()
     else:
         option_values = {}
-        option_values['usetitle'] = len(sys.argv) == 2
+        # option_values['usetitle'] = len(sys.argv) == 2
         
         for name_, fullname, default_value, help_message in args:
             try:
