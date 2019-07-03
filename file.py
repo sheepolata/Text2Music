@@ -1,6 +1,8 @@
 import string
 import operator
 import numpy as np
+import json as js
+from pprint import pprint
 
 class TextFileToMusic(object):
     """docstring for TextFileToMusic"""
@@ -12,7 +14,7 @@ class TextFileToMusic(object):
 
         self.file = open(self.path, "r", encoding="utf8")
 
-        self.content = self.file.read()
+        self.raw_content = self.file.read()
 
         #Remove ponctuation
         exclude = set(string.punctuation)
@@ -20,6 +22,124 @@ class TextFileToMusic(object):
         self.content = self.content.lower()
 
         self.words = self.content.split()
+
+        self.markov = {}
+
+    def computeMarkovChain(self):
+
+        try:
+            with open("./data/markovchains/" + self.title + "_markovchain.json", 'r') as fp:
+                print("Load Markov Chain from " + "./data/markovchains/" + self.title + "_markovchain.json\r", end='', flush=True)
+                self.markov = js.load(fp)
+                print("Load Markov Chain from " + "./data/markovchains/" + self.title + "_markovchain.json - done\r", end='', flush=True)
+                print('')
+        except:
+            raw_words = self.raw_content.split()
+            # print(self.raw_content)
+            # print(raw_words)
+
+            ponct_after  = ['.',',','?','!',':',';',']','}','\''] #['.',',','?','!',':',';',')',']','}']
+            ponct_before = ['{','[','('] #['(','[','{']
+
+            j = 0.0
+            for w in raw_words:
+                print("Fixing Raw content... {0}%\r".format(round(((j/float(len(raw_words)))*100.0), 2)), end='', flush=True)
+                j += 1.0
+                # if any((c in ponct_after) for c in w) and len(w) > 1:
+                if any((c in w) for c in ponct_before) and len(w) > 1:
+                    if w[0] not in ponct_before:
+                        continue
+                    i = raw_words.index(w)
+                    del raw_words[i]
+                    raw_words.insert(i, w[0])
+                    raw_words.insert(i+1, w[1:])
+                # elif any((c in ponct_before) for c in w) and len(w) > 1:
+                elif any((c in w) for c in ponct_after) and len(w) > 1:
+                    if w[-1] not in ponct_after:
+                        continue
+                    i = raw_words.index(w)
+                    del raw_words[i]
+                    raw_words.insert(i, w[:-1])
+                    raw_words.insert(i+1, w[-1])
+            print("Fixing Raw content... {0}% - done\r".format(round(((j/float(len(raw_words)))*100.0), 2)), end='', flush=True)
+            print('')
+
+            # print(raw_words)
+
+            for index in range(len(raw_words)-1):
+                print("Contructing Markov chain... {0}%\r".format(round((float(index)/float(len(raw_words)))*100.0, 2)), end='', flush=True)
+
+                _current = raw_words[index]
+                _next = raw_words[index+1]
+
+                if _current not in self.markov:
+                    self.markov[_current] = {}
+
+                if _next not in self.markov[_current]:
+                    self.markov[_current][_next] = 1
+                else:
+                    self.markov[_current][_next] += 1
+            
+            print("Contructing Markov chain... {0}% - done\r".format(round((float(index+2)/float(len(raw_words)))*100.0, 2)), end='', flush=True)
+            print('')
+
+            with open("./data/markovchains/" + self.title + "_markovchain.json", 'w') as fp:
+                print("Write Markov Chain to " + "./data/markovchains/" + self.title + "_markovchain.json\r", end='', flush=True)
+                js.dump(self.markov, fp, sort_keys=True, indent=4)
+                print("Write Markov Chain to " + "./data/markovchains/" + self.title + "_markovchain.json - done\r", end='', flush=True)
+                print('')
+
+            # pprint(self.markov)
+
+    def generateTextFromMarkov(self, length=500):
+        gen_txt = []
+
+        first = np.random.choice(list(self.markov.keys()))
+        gen_txt.append(first)
+        # print(first)
+
+        prev = first
+        for i in range(length):
+            print("Generating text... {0}%\r".format(round((float(i)/float(length))*100.0, 2)), end='', flush=True)
+
+            choices = list(self.markov[prev].keys())
+            p = list(self.markov[prev].values())
+            _s = np.sum(p)
+            p /= _s
+
+            choice = np.random.choice(choices, p=p)
+            gen_txt.append(choice)
+            prev = choice
+
+        print("Generating text... {0}% - done\r".format(round((float(i+1)/float(length))*100.0, 2)), end='', flush=True)
+        print('')
+
+        ponct_after  = ['.',',','?','!',':',';',')',']','}']
+        ponct_before = ['(','[','{']
+        lres = []
+        res = ""
+        j = 0.0
+        for w in gen_txt:
+            print("Fix generated text... {0}%\r".format(round((float(j)/float(len(gen_txt)))*100.0, 2)), end='', flush=True)
+            j += 1.0
+            if w in ponct_before:
+                    res += w
+            if w in ponct_after:
+                res = res[:-1]
+                if w == '.':
+                    # res += w + '\n'
+                    lres.append(res + w)
+                    res = ""
+                else:
+                    res += w + " "
+            else:
+                res += w + " "
+        print("Fix generated text... {0}% - done\r".format(round((float(j)/float(len(gen_txt)))*100.0, 2)), end='', flush=True)
+        print('')
+        # print(lres)
+
+        return lres
+
 
     def get_word_value(self, word, f="mean"):
         if f == "mean":
@@ -146,3 +266,23 @@ class TextFileToMusic(object):
             return self._get_bpm(), self._get_instrument(), generator, int(octave)
         else:
             return int(bpm), instrument, generator, int(octave)
+
+
+if __name__ == '__main__':
+    # f = TextFileToMusic("./data/The Bible.txt", "The Bible")
+    f = TextFileToMusic("./data/The Bible Small.txt", "The Bible Small")
+
+    f.computeMarkovChain()
+    t = f.generateTextFromMarkov(length = 1000)
+
+    r = open("./output/markov_" + f.title + ".txt", "w", encoding='utf-8')
+    disp_i = 0
+    for i, l in enumerate(t):
+        disp_i = i
+        print("Write text... {0}%\r".format(round((float(i)/float(len(t)))*100.0, 2)), end='', flush=True)
+        r.write(l + '\n')
+    print("Write text... {0}% - done\r".format(round((float(disp_i+1)/float(len(t)))*100.0, 2)), end='', flush=True)
+    print('')
+    print("Results wrote to" + "./output/markov_" + f.title + ".txt")
+
+    r.close()
