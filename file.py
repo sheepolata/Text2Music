@@ -295,13 +295,14 @@ class TextFileToMusic(object):
         # return int(v)
         # return candidates[len(self.title) % len(candidates)]
 
-    def get_params(self, bpm, instrument, generator, octave, markov, markovseed, usetitle, reloadmarkov):
+    def get_params(self, bpm, instrument, generator, octave, markov, markovgenerationlength, markovseed, usetitle, reloadmarkov):
         self.markov_seed = int(markovseed)
         self.reloadmarkov = bool(reloadmarkov)
+        self.markov_length = int(markovgenerationlength)
         if usetitle == True:
-            return self._get_bpm(), self._get_instrument(), generator, int(octave), bool(markov), int(markovseed), bool(reloadmarkov)
+            return self._get_bpm(), self._get_instrument(), generator, int(octave), bool(markov), int(markovgenerationlength), int(markovseed), bool(reloadmarkov)
         else:
-            return int(bpm), instrument, generator, int(octave), bool(markov), int(markovseed), bool(reloadmarkov)
+            return int(bpm), instrument, generator, int(octave), bool(markov), int(markovgenerationlength), int(markovseed), bool(reloadmarkov)
 
 
 if __name__ == '__main__':

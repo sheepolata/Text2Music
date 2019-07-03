@@ -173,7 +173,7 @@ class SoundPySynth(object):
     def generate_wav(self, f, version='a', filepath="out", markov=False):
         ws = f.words
         if markov:
-            ws, lines = f.wordListFromMarkov()
+            ws, lines = f.wordListFromMarkov(length=f.markov_length)
             r = open("./output/markov_" + f.title + "_" + str(f.markov_seed) + ".txt", "w", encoding='utf-8')
             disp_i = 0
             for i, l in enumerate(lines):
