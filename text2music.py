@@ -18,6 +18,9 @@ def text_2_music(filepath, **params):
     # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), filepath=output_file+"channel", version=instrument, markov=markov)
     song = s.generate_wav(f, filepath=output_file+"channel", version=instrument, markov=markov)
 
+    
+    # s.readWav()
+
     '''
     Join wav files together (one after the other)
     '''

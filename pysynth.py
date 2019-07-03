@@ -20,6 +20,8 @@ import wave
 import pydub
 import numpy as np
 
+import time, _thread
+
 import file
 
 # import pysynth_b as psb # a, b, e, and s variants available
@@ -61,6 +63,10 @@ class SoundPySynth(object):
 
         # self.possible_durations = [-16, -12, -8, -4, 4, 8, 12, 16]
         self.possible_durations = [4, 2, 1, 0.5]
+
+        self.wavpath = None
+        self.used_words = []
+        self.song = []
 
     def initialise_notes(self):
         _notes = ["c", "d", "e", "f", "g", "a", "b"]
@@ -186,26 +192,115 @@ class SoundPySynth(object):
 
             r.close()
 
+        self.used_words = ws
+
         if self.generation_type == "chain":
-            song = self.generate_song_chain(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
+            self.song = self.generate_song_chain(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
         else:
-            song = self.generate_song(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
+            self.song = self.generate_song(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
 
         txt_markov = "_markov"+str(f.markov_seed) if markov else ""
 
+        self.wavpath = filepath
         if version == "a":
-            psa.make_wav(song, fn = filepath + "_flute"+txt_markov+".wav", bpm = self.bpm)
+            self.wavpath += "_flute"+txt_markov+".wav"
+            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "b":
-            psb.make_wav(song, fn = filepath + "_piano"+txt_markov+".wav", bpm = self.bpm)
+            self.wavpath += "_piano"+txt_markov+".wav"
+            psb.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "c":
-            psc.make_wav(song, fn = filepath + "_bowed"+txt_markov+".wav", bpm = self.bpm)
+            self.wavpath += "_bowed"+txt_markov+".wav"
+            psc.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "d":
-            psd.make_wav(song, fn = filepath + "_woodwind"+txt_markov+".wav", bpm = self.bpm)
+            self.wavpath += "_woodwind"+txt_markov+".wav"
+            psd.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "e":
-            pse.make_wav(song, fn = filepath + "_rhodes"+txt_markov+".wav", bpm = self.bpm)
+            self.wavpath += "_rhodes"+txt_markov+".wav"
+            pse.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "p":
-            psp.make_wav(song, fn = filepath + "_percs"+txt_markov+".wav", bpm = self.bpm)
+            self.wavpath += "_percs"+txt_markov+".wav"
+            psp.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "s":
-            pss.make_wav(song, fn = filepath + "_strings"+txt_markov+".wav", bpm = self.bpm)
+            self.wavpath += "_strings"+txt_markov+".wav"
+            pss.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         else:
-            psa.make_wav(song, fn = filepath +txt_markov+".wav", bpm = self.bpm)
+            self.wavpath += txt_markov+".wav"
+            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
+
+    def readWav(self):
+        if(self.wavpath == None):
+            print("No Wave Path stored...")
+            return
+
+        print("Play {} ... Enjoy !".format(self.wavpath))
+        #define stream chunk   
+        chunk = 1024  
+
+        #open a wav format music  
+        wavfile = wave.open(self.wavpath, mode='rb')
+        #instantiate PyAudio  
+        p = pyaudio.PyAudio()  
+        #open stream  
+        stream = p.open(format = p.get_format_from_width(wavfile.getsampwidth()),  
+                        channels = wavfile.getnchannels(),  
+                        rate = wavfile.getframerate(),  
+                        output = True)  
+        #read data  
+        data = wavfile.readframes(chunk)  
+
+        duration_sec = wavfile.getnframes()/wavfile.getframerate()
+
+        
+        _thread.start_new_thread( print_song, (self.song, self.used_words, self.bpm ) )
+
+        #play stream  
+        while data:  
+            stream.write(data)  
+            data = wavfile.readframes(chunk)  
+
+
+        #stop stream  
+        stream.stop_stream()  
+        stream.close()  
+
+        #close PyAudio  
+        p.terminate() 
+
+        print("Thank you for listening, bye bye !")
+
+
+def print_song(song, words, bpm):
+    if len(song) != len(words):
+        return
+
+    # print("BPM = {}".format(bpm))
+
+
+    to_print  = ""
+    max_char_per_line = 70
+    beat = 0
+    for i in range(len(song)):
+        note = song[i]
+        # word = words[i]
+        to_print += words[i] + " "
+        if(len(to_print) > max_char_per_line):
+            to_print += '\n'
+            print("{}\r".format(to_print), end='', flush=True)
+            to_print = ""
+        else:
+            pass
+            print("{}\r".format(to_print), end='', flush=True)
+
+        # beat += note[1]
+        # print(beat)
+
+        i += 1
+        time.sleep( (1.0/float(note[1])) )
+    print('')
+
+def print_time(threadName, delay):
+    count = 0
+    while count < 5:
+        time.sleep(delay)
+        count += 1
+        print ("{}: {}".format( threadName, time.ctime(time.time()) ))
