@@ -201,7 +201,7 @@ class SoundPySynth(object):
 
         txt_markov = "_markov_"+str(f.markov_seed) if markov else ""
 
-        self.wavpath = filepath + "_" + self.generation_type + "_"
+        self.wavpath = filepath + "_" + self.generation_type
         if version == "a":
             self.wavpath += "_flute"+txt_markov+".wav"
             psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)

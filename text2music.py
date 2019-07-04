@@ -11,14 +11,14 @@ def text_2_music(filepath, **params):
     f = file.TextFileToMusic(filepath, filename)
     bpm, instrument, gen, octave, markov, markovgenerationlength, markovseed, reloadmarkov = f.get_params(**params)
 
-    output_file = "./output/" + filename + "_"
+    output_file = "./output/" + filename
     s = SoundPySynth(octave=octave, bpm=bpm, generation_type=gen)
 
 
     # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), filepath=output_file+"channel", version=instrument, markov=markov)
-    song = s.generate_wav(f, filepath=output_file+"channel", version=instrument, markov=markov)
+    song = s.generate_wav(f, filepath=output_file, version=instrument, markov=markov)
 
-    
+
     # s.readWav()
 
     '''
