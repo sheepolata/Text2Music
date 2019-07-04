@@ -93,7 +93,7 @@ class SoundPySynth(object):
 
         song.append((initial_note, initial_duration))
 
-        for i in range(len(values)):
+        for i in range(1, len(values)):
             v = int(math.floor((values[i] - values_min)/(values_max - values_min) * note_index_max))
             l = int(math.floor((length[i] - len_min)/(len_max - len_min) * duration_index_max))
             song.append((self.notes[v], self.possible_durations[l]))
@@ -271,6 +271,7 @@ class SoundPySynth(object):
 
 def print_song(song, words, bpm):
     if len(song) != len(words):
+        print("song size {} != words size {}".format(len(song), len(words)))
         return
 
     # print("BPM = {}".format(bpm))
