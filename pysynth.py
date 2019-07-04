@@ -199,9 +199,9 @@ class SoundPySynth(object):
         else:
             self.song = self.generate_song(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
 
-        txt_markov = "_markov"+str(f.markov_seed) if markov else ""
+        txt_markov = "_markov_"+str(f.markov_seed) if markov else ""
 
-        self.wavpath = filepath
+        self.wavpath = filepath + "_" + self.generation_type + "_"
         if version == "a":
             self.wavpath += "_flute"+txt_markov+".wav"
             psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
