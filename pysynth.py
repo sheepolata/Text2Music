@@ -227,7 +227,7 @@ class SoundPySynth(object):
             self.wavpath += txt_markov+".wav"
             psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
 
-    def readWav(self):
+    def playWavWithDispay(self):
         if(self.wavpath == None):
             print("No Wave Path stored...")
             return
@@ -248,10 +248,18 @@ class SoundPySynth(object):
         #read data  
         data = wavfile.readframes(chunk)  
 
-        duration_sec = wavfile.getnframes()/wavfile.getframerate()
+        wav_duration_sec = wavfile.getnframes()/wavfile.getframerate()
+        wav_duration_min = wav_duration_sec / 60.
+        nb_beat = np.sum([(1./n[1])*4. for n in self.song])
+        bps = float(self.bpm) / 60.
+        # beat_duration_sec = 1./bps
+        beat_duration_min = wav_duration_min / nb_beat
+        beat_duration_sec = wav_duration_sec / nb_beat
+
+        print("dsec = {}, dmin = {}, bpm = {}, nb_beat = {}, bps = {}, bdm = {}, bds = {}".format(wav_duration_sec, wav_duration_min, self.bpm, nb_beat, bps, beat_duration_min, beat_duration_sec))
 
         
-        _thread.start_new_thread( print_song, (self.song, self.used_words, self.bpm ) )
+        _thread.start_new_thread( print_song, (self.song, self.used_words, beat_duration_sec ) )
 
         #play stream  
         while data:  
@@ -269,18 +277,17 @@ class SoundPySynth(object):
         print("Thank you for listening, bye bye !")
 
 
-def print_song(song, words, bpm):
+def print_song(song, words, beat_duration):
+    # total_t = time.time()
     if len(song) != len(words):
         print("song size {} != words size {}".format(len(song), len(words)))
         return
-
-    # print("BPM = {}".format(bpm))
-
 
     to_print  = ""
     max_char_per_line = 70
     beat = 0
     for i in range(len(song)):
+        offset_t = time.time()
         note = song[i]
         # word = words[i]
         to_print += words[i] + " "
@@ -296,8 +303,13 @@ def print_song(song, words, bpm):
         # print(beat)
 
         i += 1
-        time.sleep( (1.0/float(note[1])) )
-    print('')
+        offset_t = time.time() - offset_t
+        # print(((1.0)/float(note[1])) * (beat_duration*4), note[1])
+        # time.sleep( ((1.0/float(note[1]))) - offset_t)
+        # time.sleep( ((1.0/float(note[1])) * (beat_duration*4.)) - offset_t)
+        # time.sleep( ((1.0/float(note[1])) / (beat_duration*4.)) - offset_t)
+        time.sleep( (((beat_duration*4.)/float(note[1]))) - offset_t)
+    # print(time.time() - total_t)
 
 def print_time(threadName, delay):
     count = 0

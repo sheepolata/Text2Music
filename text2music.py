@@ -19,7 +19,7 @@ def text_2_music(filepath, **params):
     song = s.generate_wav(f, filepath=output_file, version=instrument, markov=markov)
 
 
-    s.readWav()
+    # s.playWavWithDispay()
 
     '''
     Join wav files together (one after the other)
