@@ -112,7 +112,7 @@ def make_wav(song,bpm=120,transpose=0,pause=.05,boost=1.1,repeat=0,fn="out.wav",
 	for rp in range(repeat+1):
 		for nn, x in enumerate(song):
 			if not silent:
-				print("[{0}/{1}] Busy making magic happen...\r".format(nn+1,len(song)), end='', flush=True)
+				print("[{0}/{1}] [{2}/{3}] Busy making magic happen...\r".format(nn+1,len(song),rp+1,repeat+1), end='', flush=True)
 			if x[0]!='r':
 				if x[0][-1] == '*':
 					vol = boost
@@ -140,7 +140,7 @@ def make_wav(song,bpm=120,transpose=0,pause=.05,boost=1.1,repeat=0,fn="out.wav",
 
 	f.writeframes(b'')
 	f.close()
-	print()
+	print('')
 
 ##########################################################################
 # Synthesize demo songs

@@ -204,10 +204,15 @@ def make_wav(song,bpm=120,transpose=0,leg_stac=.9,boost=1.1,repeat=0,fn="out.wav
 	data = np.zeros(int((repeat+1)*t_len + 441000))
 	#print len(data)/44100., "s allocated"
 
+	##########################################################################
+	# Write to output file (in WAV format)
+	##########################################################################
+	if silent == False:
+		print("Writing to file", fn)
 	for rp in range(repeat+1):
 		for nn, x in enumerate(song):
 			if not silent:
-				print("[{0}/{1}] Busy making magic happen...\r".format(nn+1,len(song)), end='', flush=True)
+				print("[{0}/{1}] [{2}/{3}] Busy making magic happen...\r".format(nn+1,len(song),rp+1,repeat+1), end='', flush=True)
 			if x[0]!='r':
 				if x[0][-1] == '*':
 					vol = boost
@@ -232,11 +237,6 @@ def make_wav(song,bpm=120,transpose=0,leg_stac=.9,boost=1.1,repeat=0,fn="out.wav
 				b=length(x[1])
 				ex_pos = ex_pos + b
 
-	##########################################################################
-	# Write to output file (in WAV format)
-	##########################################################################
-	if silent == False:
-		print("Writing to file", fn)
 
 	data = data / (data.max() * 2.)
 	out_len = int(2. * 44100. + ex_pos+.5)
@@ -244,7 +244,7 @@ def make_wav(song,bpm=120,transpose=0,leg_stac=.9,boost=1.1,repeat=0,fn="out.wav
 	data2[:] = 32000. * data[:out_len]
 	f.writeframes(data2.tostring())
 	f.close()
-	print()
+	print('')
 
 ##########################################################################
 # Synthesize demo songs
