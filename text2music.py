@@ -4,16 +4,17 @@ from os import path
 
 from pysynth import SoundPySynth
 
-def text_2_music(filepath, **params):
+def text_2_music(filepath, octave, generator, markov, **params):
     print("###### Welcome to the TextToMusic Program V2 ######")
     filename = path.splitext(filepath)[0]
     filepath = "./data/" + filepath
     f = file.TextFileToMusic(filepath, filename)
-    bpm, instrument, gen, octave, markov, markovgenerationlength, markovseed, reloadmarkov = f.get_params(**params)
+
+    # Get a few parameters that are derived from the title
+    bpm, instrument = f.get_params(**params)
 
     output_file = "./output/" + filename
-    s = SoundPySynth(octave=octave, bpm=bpm, generation_type=gen)
-
+    s = SoundPySynth(octave=octave, bpm=bpm, generation_type=generator)
 
     # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), filepath=output_file+"channel", version=instrument, markov=markov)
     # song = s.generate_wav(f, filepath=output_file, version=instrument, markov=markov)
@@ -121,7 +122,15 @@ if __name__ == '__main__':
             try:
                 if not no_value:
                     id_name = sys.argv.index('-{}'.format(name_)) + 1
-                    option_values[fullname] = sys.argv[id_name]
+                    param_value = sys.argv[id_name]
+                    if param_value.isdigit():
+                        param_value = int(param_value)
+                    elif param_value == 'True':
+                        param_value = True
+                    elif param_value == 'False':
+                        param_value = False
+
+                    option_values[fullname] = param_value
                 else:
                     id_name = sys.argv.index('-{}'.format(name_))
                     option_values[fullname] = not default_value
