@@ -74,6 +74,7 @@ class SoundPySynth(object):
 
 
     def _initialise_samples(self):
+        # Works with nested directories as well
         sample_files = glob.glob("data/samples/**/*.mp3", recursive=True)
         self.samples = {}
         for f in sample_files:
