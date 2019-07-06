@@ -17,9 +17,12 @@ import PySynth.pysynth_s as pss
 import math
 import pyaudio
 import wave
-import pydub
-import numpy as np
+import glob
+import os
 
+from pydub import AudioSegment as audio
+import numpy as np
+from os import path
 import time, _thread
 
 import file
@@ -59,7 +62,7 @@ class SoundPySynth(object):
         self.octave = max(self.min_octave, min(octave, self.max_octave))
 
         self.initialise_notes()
-
+        self._initialise_samples()
         # self.notes = ["c"]
 
         # self.possible_durations = [-16, -12, -8, -4, 4, 8, 12, 16]
@@ -68,6 +71,14 @@ class SoundPySynth(object):
         self.wavpath = None
         self.used_words = []
         self.song = []
+
+
+    def _initialise_samples(self):
+        sample_files = glob.glob("data/samples/**/*.mp3", recursive=True)
+        self.samples = {}
+        for f in sample_files:
+            f_name = path.splitext(path.basename(f))[0]
+            self.samples[f_name] = audio.from_mp3(f)
 
     def initialise_notes(self):
         _notes = ["c", "d", "e", "f", "g", "a", "b"]
@@ -205,132 +216,46 @@ class SoundPySynth(object):
         self.wavpath = filepath + "_" + self.generation_type
         if version == "a":
             self.wavpath += "_flute"+txt_markov+".wav"
-            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
         elif version == "b":
             self.wavpath += "_piano"+txt_markov+".wav"
-            psb.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
         elif version == "c":
             self.wavpath += "_bowed"+txt_markov+".wav"
-            psc.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
         elif version == "d":
             self.wavpath += "_woodwind"+txt_markov+".wav"
-            psd.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
         elif version == "e":
             self.wavpath += "_rhodes"+txt_markov+".wav"
-            pse.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
         elif version == "p":
             self.wavpath += "_percs"+txt_markov+".wav"
-            psp.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
         elif version == "s":
             self.wavpath += "_strings"+txt_markov+".wav"
-            pss.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
         else:
             self.wavpath += txt_markov+".wav"
-            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
+        
+        psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
+        print('')
 
-        # return self.wavpath
+        return self.wavpath
 
     def generate_orchestra(self, f, offset_duration=8, version='a', filepath="out", markov=False):
-        ws = f.words
-        if markov:
-            ws, lines = f.wordListFromMarkov(length=f.markov_length)
-            r = open("./output/markov_" + f.title + "_" + str(f.markov_seed) + ".txt", "w", encoding='utf-8')
-            disp_i = 0
-            for i, l in enumerate(lines):
-                disp_i = i
-                print("Write text... {0}%\r".format(round((float(i)/float(len(lines)))*100.0, 2)), end='', flush=True)
-                r.write(l + '\n')
-            print("Write text... {0}% - done\r".format(round((float(disp_i+1)/float(len(lines)))*100.0, 2)), end='', flush=True)
-            print('')
-            print("Results wrote to" + "./output/markov_" + f.title + "_" + str(f.markov_seed) + ".txt")
-
-            r.close()
-
-        self.used_words = ws
-
-        word_values, duration_factor = f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws)
-
-        if self.generation_type == "chain":
-            self.song = self.generate_song_chain(word_values, duration_factor)
-        else:
-            self.song = self.generate_song(word_values, duration_factor)
-
-        addition_wav_files = []
-        instruments_to_add = [(psp.make_wav, 1, 4), (pss.make_wav, 2, 1)]
-
-        offset_notes = []
-        for i in range(offset_duration):
-            offset_notes.append(('r', 2))
-
-        self.song = offset_notes + list(self.song)
-        self.song = list(self.song) + offset_notes
-        self.song = tuple(self.song)
-
-        # print(self.song)
-        self.wavpath = filepath + "_" + self.generation_type
+        wavpath = self.generate_wav(f, version, filepath, markov)
         txt_markov = "_markov_"+str(f.markov_seed) if markov else ""
-        self.wavpath += txt_markov+".wav"
+        harmony = audio.from_wav(wavpath)
 
-        if version == "b":
-            self.wavpath += "_piano"+txt_markov+".wav"
-            psb.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
-        elif version == "e":
-            self.wavpath += "_rhodes"+txt_markov+".wav"
-            pse.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
-        else:
-            self.wavpath += txt_markov+".wav"
-            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
-            print('')
+        # Add a silent of `offset_duration times a quarter of second' at the start
+        harmony  = audio.silent(250*offset_duration) + harmony 
 
+        # Add base rhythm
+        base_rythm = [('drum_kick', 0), ('drum_kick', .5), ('snare', 0), ('snare', .25), ('snare', .75)]
+        mashup = audio.silent(duration=1000)
 
-        for index, ita in enumerate(instruments_to_add):
-            a = np.random.randint(0, max(len(word_values)-int(offset_duration*ita[1]), 1))
-            # b = np.random.randint(a+int(offset_duration*ita[1]), len(word_values))
-            loop_values  = word_values[a:min(a+int(offset_duration*ita[1]), len(word_values))]
-            loop_factors = duration_factor[a:min(a+int(offset_duration*ita[1]), len(duration_factor))]
-            # print(loop_values, len(loop_values), a, a+int(offset_duration*ita[1]))
-            # if self.generation_type == "chain":
-            #     loop_song = self.generate_song_chain(loop_values, loop_factors)
-            # else:
-            loop_song = self.generate_song(loop_values, loop_factors)
-            #SET THE NOTES TO BE REGULAR
-            loop_song = tuple([(n[0], ita[2]) for n in loop_song])
-            # print(loop_song)
+        for sample_name, start in base_rythm:
+            mashup = mashup.overlay(self.samples[sample_name], position=start*1000)
 
-            nb_beat = np.sum([(1./n[1])*4. for n in self.song])
-            loop_filepath_percs = filepath + "_background" + str(index) + "_" + txt_markov + ".wav"
-            ita[0](loop_song, fn=loop_filepath_percs, bpm = self.bpm, repeat=int(nb_beat/ np.sum([(1./n[1])*4. for n in loop_song]) ))
-            print('')
-            addition_wav_files.append(loop_filepath_percs)
+        harmony = harmony .overlay(mashup, loop=True)
 
-        sound1 = pydub.AudioSegment.from_wav(self.wavpath)
-
-        for fp in addition_wav_files:
-            sound2 = pydub.AudioSegment.from_wav(fp)
-            # combined_sounds = sound1 + sound2 #Check OVERLAY
-            sound1 = sound1.overlay(sound2, gain_during_overlay=4)
-
-        import os
-        print("delete " + self.wavpath)
         os.remove(self.wavpath)
-        for fp in addition_wav_files:
-            print("delete " + fp)
-            os.remove(fp)
-
-        sound1.export(filepath + "_orchestra_" + txt_markov + ".wav", format="wav")
+        harmony.export(filepath + "_orchestra_" + txt_markov + ".wav", format="wav")
         print("Quality music saved to {} ... Enjoy listening !".format(filepath + "_orchestra_" + txt_markov + ".wav"))
-
-
 
 
 
