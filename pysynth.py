@@ -19,6 +19,7 @@ import pyaudio
 import wave
 import glob
 import os
+import random
 
 from pydub import AudioSegment as audio
 import numpy as np
@@ -213,7 +214,7 @@ class SoundPySynth(object):
             self.song = self.generate_song(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
 
         txt_markov = "_markov_"+str(f.markov_seed) if markov else ""
-
+        print(self.song)
         self.wavpath = filepath + "_" + self.generation_type
         if version == "a":
             self.wavpath += "_flute"+txt_markov+".wav"
@@ -241,20 +242,22 @@ class SoundPySynth(object):
         wavpath = self.generate_wav(f, version, filepath, markov)
         txt_markov = "_markov_"+str(f.markov_seed) if markov else ""
         harmony = audio.from_wav(wavpath)
-        # Duration of a bar for a 4/4 time signature
-        bar_duration = 1000 / (self.bpm / 60) * 4 
+        # Duration of a quarter for a 4/4 time signature
+        quarter_duration = 1000 / (self.bpm / 60)
         # Add a silent of `offset_duration' quarter at the start
-        harmony  = audio.silent(bar_duration*offset_duration/4) + harmony 
+        harmony  = audio.silent(quarter_duration*offset_duration) + harmony 
 
-        # Add one of the base rhythm
-        accompaniment = random.choice(
-            [('drum_kick', 0), ('drum_kick', .5), ('snare', 0), ('snare', .25), ('snare', .75)],
-            [('drum_kick', 0), ('drum_kick', .25), ('snare', .5)]
-        )
-        mashup = audio.silent(duration=bar_duration)
+        # list of accompaniments. 
+        # Each make up a bar, composed of 4 beats. 
+        accompaniment = random.choice([
+            [('drum_kick', 0), ('drum_kick', 2), ('snare', 0), ('snare', 1), ('snare', 3)],
+            [('drum_kick', 0), ('drum_kick', 1), ('snare', 2)]
+        ])
+        # Create an empty bar
+        mashup = audio.silent(duration=quarter_duration * 4)
 
         for sample_name, start in accompaniment:
-            mashup = mashup.overlay(self.samples[sample_name], position=start*bar_duration)
+            mashup = mashup.overlay(self.samples[sample_name], position=start*quarter_duration)
 
         harmony = harmony .overlay(mashup, loop=True)
 
