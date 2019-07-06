@@ -247,13 +247,13 @@ class SoundPySynth(object):
         harmony  = audio.silent(250*offset_duration) + harmony 
 
         # Add one of the base rhythm
-        base_rythm = random.choice(
+        accompaniment = random.choice(
             [('drum_kick', 0), ('drum_kick', .5), ('snare', 0), ('snare', .25), ('snare', .75)],
             [('drum_kick', 0), ('drum_kick', .25), ('snare', .5)]
         )
         mashup = audio.silent(duration=bar_duration)
 
-        for sample_name, start in base_rythm:
+        for sample_name, start in accompaniment:
             mashup = mashup.overlay(self.samples[sample_name], position=start*bar_duration)
 
         harmony = harmony .overlay(mashup, loop=True)
