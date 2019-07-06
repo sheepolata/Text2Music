@@ -20,6 +20,7 @@ import wave
 import glob
 import os
 import random
+import matplotlib.pyplot as plt
 
 from pydub import AudioSegment as audio
 import numpy as np
@@ -89,6 +90,12 @@ class SoundPySynth(object):
             # self.notes.append(n + "b" + str(self.octave))
             self.notes.append(n + str(self.octave))
             # self.notes.append(n + "#" + str(self.octave))
+
+        self.all_notes = []
+        for o in range(self.min_octave, self.max_octave+1):
+            for n in _notes:
+                self.all_notes.append('{}{}'.format(n ,o))
+
 
     def generate_song(self, values, length):
         song = []
@@ -214,7 +221,6 @@ class SoundPySynth(object):
             self.song = self.generate_song(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
 
         txt_markov = "_markov_"+str(f.markov_seed) if markov else ""
-        print(self.song)
         self.wavpath = filepath + "_" + self.generation_type
         if version == "a":
             self.wavpath += "_flute"+txt_markov+".wav"
@@ -316,6 +322,50 @@ class SoundPySynth(object):
 
         print("Thank you for listening, bye bye !")
 
+    def show_graph(self, title=None):
+        current_x = 0
+        xmins = []
+        xmaxs = []
+        curve = []
+
+        for pitch, duration in self.song:
+            curve.append(self.all_notes.index(pitch))
+            xmins.append(current_x)
+            current_x += (1./duration)
+            xmaxs.append(current_x)
+
+        plt.figure(figsize=(6, 4))
+
+        ### Curve plot
+        ax0 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
+        if title:
+            plt.title(title)
+
+        ax0.hlines(curve, xmins, xmaxs, color='C0')
+
+        ### Plot the base note
+        ax0.hlines([curve[0]], [0], [current_x], alpha=.5, color='C1')
+
+        ### Add four lines above and below the curve
+        min_y = max(0, min(curve) - 4)
+        max_y = min(len(self.all_notes), max(curve) + 4)
+        ax0.set_yticks(np.arange(min_y, max_y))
+        ax0.set_ylim(min_y, max_y)
+        ax0.set_yticklabels(self.all_notes[min_y:max_y])
+
+        ax0.grid(axis='y', color='gray', alpha=.2, linestyle='--')
+
+
+        ### TODO: plot the FFT curve
+        ### Should be calculated from the pydub audiosegment raw data
+        ax1 = plt.subplot2grid((3, 1), (2, 0))
+        ax1.set_xticks(())
+        ax1.set_yticks(())
+        ax1.text(0.5, 0.5, 'FFT Placement', ha='center', va='center',
+                size=24, alpha=.5)
+        plt.tight_layout()
+        plt.show()
+
 
 def print_song(song, words, beat_duration):
     # total_t = time.time()
@@ -357,3 +407,5 @@ def print_time(threadName, delay):
         time.sleep(delay)
         count += 1
         print ("{}: {}".format( threadName, time.ctime(time.time()) ))
+
+

@@ -4,7 +4,7 @@ from os import path
 
 from pysynth import SoundPySynth
 
-def text_2_music(filepath, octave, generator, markov, **params):
+def text_2_music(filepath, octave, generator, markov, plotmusic, **params):
     print("###### Welcome to the TextToMusic Program V2 ######")
     filename = path.splitext(filepath)[0]
     filepath = "./data/" + filepath
@@ -19,6 +19,8 @@ def text_2_music(filepath, octave, generator, markov, **params):
     # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), filepath=output_file+"channel", version=instrument, markov=markov)
     # song = s.generate_wav(f, filepath=output_file, version=instrument, markov=markov)
     song = s.generate_orchestra(f, filepath=output_file, version=instrument, markov=markov)
+    if plotmusic:
+        s.show_graph(filename)
 
 
     # s.playWavWithDispay()
@@ -101,6 +103,13 @@ if __name__ == '__main__':
             'reloadmarkov',
             False,
             'Force the recomputing of the markov chain',
+            True
+        ),
+        (
+            'p',
+            'plotmusic',
+            False,
+            'Plot the music',
             True
         )
     ]

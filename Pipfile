@@ -7,6 +7,7 @@ verify_ssl = true
 pyaudio = "*"
 numpy = "*"
 pydub = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.6"
