@@ -243,8 +243,8 @@ class SoundPySynth(object):
         harmony = audio.from_wav(wavpath)
         # Duration of a bar for a 4/4 time signature
         bar_duration = 1000 / (self.bpm / 60) * 4 
-        # Add a silent of `offset_duration times a quarter of second' at the start
-        harmony  = audio.silent(250*offset_duration) + harmony 
+        # Add a silent of `offset_duration' quarter at the start
+        harmony  = audio.silent(bar_duration*offset_duration/4) + harmony 
 
         # Add one of the base rhythm
         accompaniment = random.choice(
