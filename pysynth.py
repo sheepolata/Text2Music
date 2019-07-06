@@ -241,16 +241,20 @@ class SoundPySynth(object):
         wavpath = self.generate_wav(f, version, filepath, markov)
         txt_markov = "_markov_"+str(f.markov_seed) if markov else ""
         harmony = audio.from_wav(wavpath)
-
+        # Duration of a bar for a 4/4 time signature
+        bar_duration = 1000 / (self.bpm / 60) * 4 
         # Add a silent of `offset_duration times a quarter of second' at the start
         harmony  = audio.silent(250*offset_duration) + harmony 
 
-        # Add base rhythm
-        base_rythm = [('drum_kick', 0), ('drum_kick', .5), ('snare', 0), ('snare', .25), ('snare', .75)]
-        mashup = audio.silent(duration=1000)
+        # Add one of the base rhythm
+        base_rythm = random.choice(
+            [('drum_kick', 0), ('drum_kick', .5), ('snare', 0), ('snare', .25), ('snare', .75)],
+            [('drum_kick', 0), ('drum_kick', .25), ('snare', .5)]
+        )
+        mashup = audio.silent(duration=bar_duration)
 
         for sample_name, start in base_rythm:
-            mashup = mashup.overlay(self.samples[sample_name], position=start*1000)
+            mashup = mashup.overlay(self.samples[sample_name], position=start*bar_duration)
 
         harmony = harmony .overlay(mashup, loop=True)
 
