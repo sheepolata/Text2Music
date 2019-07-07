@@ -324,8 +324,8 @@ class SoundPySynth(object):
         print("Thank you for listening, bye bye !")
 
     def _get_fft_data(self, audio_seg, normed=False):
-        num_samples = len(audio_seg.get_array_of_samples())
         audioslice = np.array(audio_seg.get_array_of_samples())
+        num_samples = len(audioslice)
         fft_result = np.fft.fft(audioslice)[range(int(round(num_samples/2)) + 1)]
         step_size = audio_seg.frame_rate / num_samples
         bins = np.arange(0, int(round(num_samples/2)) + 1, 1.0) * step_size
@@ -370,9 +370,10 @@ class SoundPySynth(object):
         ax.set_yticks(np.arange(min_y, max_y))
         ax.set_ylim(min_y, max_y)
         ax.set_yticklabels(self.all_notes[min_y:max_y])
+        ax.set_ylabel('Pitch')
+        
         ax.set_xticks(())
         ax.set_xlabel('Duration')
-        ax.set_ylabel('Pitch')
         ax.grid(axis='y', color='gray', alpha=.2, linestyle='--')
 
         ### FFT Analysis
