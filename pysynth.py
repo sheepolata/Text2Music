@@ -265,10 +265,11 @@ class SoundPySynth(object):
         for sample_name, start in accompaniment:
             mashup = mashup.overlay(self.samples[sample_name], position=start*quarter_duration)
 
-        harmony = harmony .overlay(mashup, loop=True)
+        harmony = harmony.overlay(mashup, loop=True)
 
         os.remove(self.wavpath)
-        harmony.export(filepath + "_orchestra_" + txt_markov + ".wav", format="wav")
+        self.wavpath = filepath + "_orchestra_" + txt_markov + ".wav"
+        harmony.export(self.wavpath, format="wav")
         print("Quality music saved to {} ... Enjoy listening !".format(filepath + "_orchestra_" + txt_markov + ".wav"))
 
 
@@ -322,7 +323,20 @@ class SoundPySynth(object):
 
         print("Thank you for listening, bye bye !")
 
-    def show_graph(self, title=None):
+    def _get_fft_data(self, audio_seg, normed=False):
+        num_samples = len(audio_seg.get_array_of_samples())
+        audioslice = np.array(audio_seg.get_array_of_samples())
+        fft_result = np.fft.fft(audioslice)[range(int(round(num_samples/2)) + 1)]
+        step_size = audio_seg.frame_rate / num_samples
+        bins = np.arange(0, int(round(num_samples/2)) + 1, 1.0) * step_size
+
+        if normed:
+            fft_result = np.abs(fft_result) / len(fft_result)
+            bins = bins / 1000
+
+        return bins, fft_result
+
+    def _get_curve_data(self):
         current_x = 0
         xmins = []
         xmaxs = []
@@ -334,35 +348,45 @@ class SoundPySynth(object):
             current_x += (1./duration)
             xmaxs.append(current_x)
 
+        return curve, xmins, xmaxs
+
+    def show_graph(self, title=None):
         plt.figure(figsize=(6, 4))
 
         ### Curve plot
-        ax0 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
+        ax = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
         if title:
             plt.title(title)
 
-        ax0.hlines(curve, xmins, xmaxs, color='C0')
+        curve, xmins, xmaxs = self._get_curve_data()
+        ax.hlines(curve, xmins, xmaxs, color='C0')
 
         ### Plot the base note
-        ax0.hlines([curve[0]], [0], [current_x], alpha=.5, color='C1')
+        ax.hlines([curve[0]], [0], [xmaxs[-1]], alpha=.5, color='C1')
 
         ### Add four lines above and below the curve
         min_y = max(0, min(curve) - 4)
         max_y = min(len(self.all_notes), max(curve) + 4)
-        ax0.set_yticks(np.arange(min_y, max_y))
-        ax0.set_ylim(min_y, max_y)
-        ax0.set_yticklabels(self.all_notes[min_y:max_y])
+        ax.set_yticks(np.arange(min_y, max_y))
+        ax.set_ylim(min_y, max_y)
+        ax.set_yticklabels(self.all_notes[min_y:max_y])
+        ax.set_xticks(())
+        ax.set_xlabel('Duration')
+        ax.set_ylabel('Pitch')
+        ax.grid(axis='y', color='gray', alpha=.2, linestyle='--')
 
-        ax0.grid(axis='y', color='gray', alpha=.2, linestyle='--')
+        ### FFT Analysis
+        ax = plt.subplot2grid((3, 1), (2, 0))
 
+        harmony = audio.from_wav(self.wavpath)
+        hist_bins, hist_vals = self._get_fft_data(harmony[1:3000], normed=True)
+        ax.plot(hist_bins, hist_vals)
 
-        ### TODO: plot the FFT curve
-        ### Should be calculated from the pydub audiosegment raw data
-        ax1 = plt.subplot2grid((3, 1), (2, 0))
-        ax1.set_xticks(())
-        ax1.set_yticks(())
-        ax1.text(0.5, 0.5, 'FFT Placement', ha='center', va='center',
-                size=24, alpha=.5)
+        ax.set_xticks(())
+        ax.set_yticks(())
+        ax.set_xlabel("kHz")
+        ax.set_ylabel("dB")
+
         plt.tight_layout()
         plt.show()
 
