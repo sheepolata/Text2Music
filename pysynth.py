@@ -257,22 +257,9 @@ class SoundPySynth(object):
         # list of accompaniments. 
         # Each make up a bar, composed of 4 beats. 
         accompaniment = random.choice([
-            {
-                'length': 4,
-                'rhythm': [('drum_kick', 0), ('drum_kick', 1), ('snare', 2)]
-            },
-            {
-                'length': 4,
-                'rhythm': [('drum_kick', 0), ('drum_kick', 2), ('snare', 0), ('snare', 1), ('snare', 3)]
-            },
-            {
-                'length': 16,
-                'rhythm': [
-                    ('drum_kick', 0), ('drum_kick', 1), ('snare', 2), ('drum_kick', 3), ('drum_kick', 4),
-                    ('drum_kick', 5), ('snare', 6), ('drum_kick', 8), ('drum_kick', 9), ('snare', 10),
-                    ('drum_kick', 11), ('drum_kick', 12), ('drum_kick', 13.6), ('snare', 14) 
-                ]
-            }
+            Beat.get_beat_simple(),
+            Beat.get_beat_simple2(),
+            Beat.get_beat_rap()
         ])
         # Create an empty bar
         mashup = audio.silent(duration=quarter_duration * accompaniment['length'])
@@ -449,3 +436,34 @@ def print_time(threadName, delay):
         print ("{}: {}".format( threadName, time.ctime(time.time()) ))
 
 
+class Beat(object):
+    def __init__(self):
+        super(Beat, self).__init__()
+
+    @staticmethod
+    def get_beat_simple():
+        res = {
+            'length': 4,
+            'rhythm': [('drum_kick', 0), ('drum_kick', 1), ('snare', 2)]
+        }
+        return res
+
+    @staticmethod
+    def get_beat_simple2():
+        res = {
+                'length': 4,
+                'rhythm': [('drum_kick', 0), ('drum_kick', 2), ('snare', 0), ('snare', 1), ('snare', 3)]
+            }
+        return res
+
+    @staticmethod
+    def get_beat_rap():
+        res = {
+                'length': 16,
+                'rhythm': [
+                    ('drum_kick', 0), ('drum_kick', 1), ('snare', 2), ('drum_kick', 3), ('drum_kick', 4),
+                    ('drum_kick', 5), ('snare', 6), ('drum_kick', 8), ('drum_kick', 9), ('snare', 10),
+                    ('drum_kick', 11), ('drum_kick', 12), ('drum_kick', 13.6), ('snare', 14) 
+                ]
+            }
+        return res
