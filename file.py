@@ -3,6 +3,7 @@ import operator
 import numpy as np
 import json as js
 from pprint import pprint
+import spacy, threading, time
 
 class TextFileToMusic(object):
     """docstring for TextFileToMusic"""
@@ -16,12 +17,51 @@ class TextFileToMusic(object):
 
         self.raw_content = self.file.read()
 
-        #Remove ponctuation
-        exclude = set(string.punctuation)
-        self.content = ''.join(ch for ch in self.raw_content if ch not in exclude)
-        self.content = self.content.lower()
+        self.spacy_model = "en_core_web_sm"
 
-        self.words = self.content.split()
+
+        def display(model):
+            load = ['\\', '|', '/', '-']
+            i = 0
+            t = threading.currentThread()
+            while getattr(t, "do_run", True):
+                print("Loading Spacy Model {}... {}\r".format(model, load[i]), end='', flush=True)
+                i = (i+1)%len(load)
+                time.sleep(0.1)
+        t = threading.Thread(target=display, args=(self.spacy_model,))
+        t.start()
+        self.nlp = spacy.load(self.spacy_model)
+        t.do_run = False
+        t.join()
+        print("Loading Spacy Model {}... done\r".format(self.spacy_model), end='', flush=True)
+        print('')
+
+        fruits = [u"apple", u"pear", u"banana", u"orange", u"strawberry", u"apples", u"pears", u"bananas", u"oranges", u"strawberries"]
+        is_fruit_getter = lambda token: token.text in fruits
+        has_fruit_getter = lambda obj: any([t.text in fruits for t in obj])
+
+        spacy.tokens.Token.set_extension("is_fruit", getter=is_fruit_getter)
+        spacy.tokens.Doc.set_extension("has_fruit", getter=has_fruit_getter)
+        spacy.tokens.Span.set_extension("has_fruit", getter=has_fruit_getter)
+
+        self.content = self.nlp(self.raw_content)
+
+        #Remove ponctuation
+        # exclude = set(string.punctuation)
+        # self.content = ''.join(ch for ch in self.raw_content if ch not in exclude)
+        # self.content = self.content.lower()
+
+        self.words = []
+        for tok in self.content:
+            if tok.pos_ not in ["SPACE", "PUNCT"]:
+                self.words.append(tok.lemma_)
+                # print(tok.text, tok.pos_)
+
+        for sent in self.content.sents:
+            print(sent.text, sent.label_, sent.sentiment, sent._.has_fruit)
+
+        # for chunck in self.content.noun_chunks:
+        #     print(chunck)
 
         self.markov = {}
 

@@ -261,6 +261,7 @@ class SoundPySynth(object):
             Beat.get_beat_simple2(),
             Beat.get_beat_rap()
         ])
+
         # Create an empty bar
         mashup = audio.silent(duration=quarter_duration * accompaniment['length'])
 
