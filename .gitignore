@@ -3,3 +3,4 @@
 output/*.wav
 output/*.txt
 !Example Songs/*
+!data/samples/**/*
