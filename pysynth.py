@@ -26,6 +26,7 @@ from pydub import AudioSegment as audio
 import numpy as np
 from os import path
 import time, _thread
+import platform
 
 import file
 
@@ -77,11 +78,11 @@ class SoundPySynth(object):
 
     def _initialise_samples(self):
         # Works with nested directories as well
-        sample_files = glob.glob("data/samples/**/*.mp3", recursive=True)
+        sample_files = glob.glob("./data/samples/**/*.wav", recursive=True)
         self.samples = {}
         for f in sample_files:
             f_name = path.splitext(path.basename(f))[0]
-            self.samples[f_name] = audio.from_mp3(f)
+            self.samples[f_name] = audio.from_wav(f)
 
     def initialise_notes(self):
         _notes = ["c", "d", "e", "f", "g", "a", "b"]
@@ -270,7 +271,7 @@ class SoundPySynth(object):
         os.remove(self.wavpath)
         self.wavpath = filepath + "_orchestra_" + txt_markov + ".wav"
         harmony.export(self.wavpath, format="wav")
-        print("Quality music saved to {} ... Enjoy listening !".format(filepath + "_orchestra_" + txt_markov + ".wav"))
+        print("Quality music saved to {} ... Enjoy listening !".format(self.wavpath))
 
 
 
