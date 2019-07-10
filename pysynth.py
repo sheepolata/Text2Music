@@ -257,13 +257,27 @@ class SoundPySynth(object):
         # list of accompaniments. 
         # Each make up a bar, composed of 4 beats. 
         accompaniment = random.choice([
-            [('drum_kick', 0), ('drum_kick', 2), ('snare', 0), ('snare', 1), ('snare', 3)],
-            [('drum_kick', 0), ('drum_kick', 1), ('snare', 2)]
+            {
+                'length': 4,
+                'rhythm': [('drum_kick', 0), ('drum_kick', 1), ('snare', 2)]
+            },
+            {
+                'length': 4,
+                'rhythm': [('drum_kick', 0), ('drum_kick', 2), ('snare', 0), ('snare', 1), ('snare', 3)]
+            },
+            {
+                'length': 16,
+                'rhythm': [
+                    ('drum_kick', 0), ('drum_kick', 1), ('snare', 2), ('drum_kick', 3), ('drum_kick', 4),
+                    ('drum_kick', 5), ('snare', 6), ('drum_kick', 8), ('drum_kick', 9), ('snare', 10),
+                    ('drum_kick', 11), ('drum_kick', 12), ('drum_kick', 13.6), ('snare', 14) 
+                ]
+            }
         ])
         # Create an empty bar
-        mashup = audio.silent(duration=quarter_duration * 4)
+        mashup = audio.silent(duration=quarter_duration * accompaniment['length'])
 
-        for sample_name, start in accompaniment:
+        for sample_name, start in accompaniment['rhythm']:
             mashup = mashup.overlay(self.samples[sample_name], position=start*quarter_duration)
 
         harmony = harmony.overlay(mashup, loop=True)
