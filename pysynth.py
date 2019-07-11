@@ -28,6 +28,8 @@ from os import path
 import time, _thread
 import platform
 
+# import ValueError
+
 import file
 
 # import pysynth_b as psb # a, b, e, and s variants available
@@ -122,75 +124,119 @@ class SoundPySynth(object):
 
         return tuple(song)
 
-    def generate_song_chain(self, values, length, return_chance=0.00):
+    def generate_song_chain(self, values, length, return_chance=0.35, fval="mean"):
         song = []
+
+        if len(values) != len(length):
+            # print(len(values), "!=", len(length))
+            raise(ValueError("Error " + str(len(values)) + " != " + str(len(length))))
 
         duration_index_max = float(len(self.possible_durations) - 1)
         note_index_max     = float(len(self.notes) - 1)
-
-        # print(values)
-        values_min = float(min(values))
-        values_max = float(max(values))
 
         len_min = float(min(length))
         len_max = float(max(length))
 
         current_note_index = np.random.randint(0, len(self.notes))
-        initial_octave = self.octave
+        initial_octave     = self.octave
         initial_note_index = current_note_index
         initial_note       = self.notes[initial_note_index]
-        # print("init", current_note_index)
 
         initial_duration = np.random.choice(self.possible_durations)
 
         song.append((initial_note, initial_duration))
 
-        prev_value = values[0]
-        prev_len   = length[0]
-        for i in range(1, len(values)):
-            # n = int(math.floor((values[i] - values_min)/(values_max - values_min) * note_index_max))
-            curr_value = values[i]
-            curr_len   = length[i]
+        if fval == "spacy":
+            # print(len(values), values)
 
-            value_diff = abs(curr_value - prev_value)
+            for i in range(0, len(values)):
+                _v = values[i][0]
 
-            sign = 1 if value_diff%2==0 else -1
+                # sign = 1 if _v > 0.35 else -1
+                # sign = 1 if _v > 0.4 else -1
+                # sign = 1 if np.random.random() > 0.5 else -1
+                
+                positive_pos_ = ["VERB", "NUM", "NOUN", "SYM", "ADP"]
+                sign = 1 if values[i][1] in positive_pos_ else -1
 
-            if value_diff <= 3:
-                current_note_index = current_note_index
-            if value_diff <= 7:
-                current_note_index = current_note_index + sign
-            else:
-                current_note_index = current_note_index + sign*2
-
-            if np.random.random() < return_chance:
-                # print("RETURN", i)
-                current_note_index = initial_note_index
-                self.octave = initial_octave
-                self.initialise_notes()
-            elif current_note_index > len(self.notes)-1:
-                if self.octave < self.max_octave:
-                    current_note_index = current_note_index%(len(self.notes)-1)
-                    self.octave += 1
-                    self.initialise_notes()
+                if _v > 0.75:
+                    current_note_index = current_note_index
+                if _v >= 0.25:
+                    current_note_index = current_note_index + sign
                 else:
-                    current_note_index = len(self.notes)-1
-            elif current_note_index < 0:
-                if self.octave > self.min_octave:
-                    current_note_index = len(self.notes)-1 + current_note_index
-                    self.octave -= 1
+                    current_note_index = current_note_index + sign*2
+
+                if i%int(len(values)/10) == 0 and np.random.random() < return_chance:
+                    # print("RETURN", i)
+                    current_note_index = initial_note_index
+                    self.octave = initial_octave
                     self.initialise_notes()
+                elif current_note_index > len(self.notes)-1:
+                    if self.octave < self.max_octave:
+                        current_note_index = current_note_index%(len(self.notes)-1)
+                        self.octave += 1
+                        self.initialise_notes()
+                    else:
+                        current_note_index = len(self.notes)-1
+                elif current_note_index < 0:
+                    if self.octave > self.min_octave:
+                        current_note_index = len(self.notes)-1 + current_note_index
+                        self.octave -= 1
+                        self.initialise_notes()
+                    else:
+                        current_note_index = 0
+
+                l = int(math.floor((length[i] - len_min)/(len_max - len_min) * duration_index_max))
+                
+                song.append((self.notes[current_note_index], self.possible_durations[l]))
+
+        else:
+            prev_value = values[0]
+            prev_len   = length[0]
+            for i in range(1, len(values)):
+                # n = int(math.floor((values[i] - values_min)/(values_max - values_min) * note_index_max))
+                curr_value = values[i]
+                curr_len   = length[i]
+
+                value_diff = abs(curr_value - prev_value)
+
+                sign = 1 if value_diff%2==0 else -1
+
+                if value_diff <= 3:
+                    current_note_index = current_note_index
+                if value_diff <= 7:
+                    current_note_index = current_note_index + sign
                 else:
-                    current_note_index = 0
+                    current_note_index = current_note_index + sign*2
 
-            # print(current_note_index, " ", self.octave)
+                if i%int(len(values)/10) == 0 and np.random.random() < return_chance:
+                    # print("RETURN", i)
+                    current_note_index = initial_note_index
+                    self.octave = initial_octave
+                    self.initialise_notes()
+                elif current_note_index > len(self.notes)-1:
+                    if self.octave < self.max_octave:
+                        current_note_index = current_note_index%(len(self.notes)-1)
+                        self.octave += 1
+                        self.initialise_notes()
+                    else:
+                        current_note_index = len(self.notes)-1
+                elif current_note_index < 0:
+                    if self.octave > self.min_octave:
+                        current_note_index = len(self.notes)-1 + current_note_index
+                        self.octave -= 1
+                        self.initialise_notes()
+                    else:
+                        current_note_index = 0
 
-            l = int(math.floor((length[i] - len_min)/(len_max - len_min) * duration_index_max))
-            
-            song.append((self.notes[current_note_index], self.possible_durations[l]))
+                # print(current_note_index, " ", self.octave)
 
-            prev_value = curr_value
-            prev_len = curr_len
+                l = int(math.floor((length[i] - len_min)/(len_max - len_min) * duration_index_max))
+                
+                song.append((self.notes[current_note_index], self.possible_durations[l]))
+
+                prev_value = curr_value
+                prev_len = curr_len
 
         # for s in song:
         #     print(s)
@@ -217,7 +263,8 @@ class SoundPySynth(object):
         self.used_words = ws
 
         if self.generation_type == "chain":
-            self.song = self.generate_song_chain(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
+            _f = "spacy"
+            self.song = self.generate_song_chain(f.get_words_values(f=_f, words=ws), f.get_duration_factors(f="len", words=ws), fval=_f)
         else:
             self.song = self.generate_song(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
 
@@ -225,22 +272,29 @@ class SoundPySynth(object):
         self.wavpath = filepath + "_" + self.generation_type
         if version == "a":
             self.wavpath += "_flute"+txt_markov+".wav"
+            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "b":
             self.wavpath += "_piano"+txt_markov+".wav"
+            psb.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "c":
             self.wavpath += "_bowed"+txt_markov+".wav"
+            psc.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "d":
             self.wavpath += "_woodwind"+txt_markov+".wav"
+            psd.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "e":
             self.wavpath += "_rhodes"+txt_markov+".wav"
+            pse.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "p":
             self.wavpath += "_percs"+txt_markov+".wav"
+            psp.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "s":
             self.wavpath += "_strings"+txt_markov+".wav"
+            pss.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         else:
             self.wavpath += txt_markov+".wav"
+            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         
-        psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         print('')
 
         return self.wavpath
@@ -257,33 +311,23 @@ class SoundPySynth(object):
         # list of accompaniments. 
         # Each make up a bar, composed of 4 beats. 
         accompaniment = random.choice([
-            {
-                'length': 4,
-                'rhythm': [('drum_kick', 0), ('drum_kick', 1), ('snare', 2)]
-            },
-            {
-                'length': 4,
-                'rhythm': [('drum_kick', 0), ('drum_kick', 2), ('snare', 0), ('snare', 1), ('snare', 3)]
-            },
-            {
-                'length': 16,
-                'rhythm': [
-                    ('drum_kick', 0), ('drum_kick', 1), ('snare', 2), ('drum_kick', 3), ('drum_kick', 4),
-                    ('drum_kick', 5), ('snare', 6), ('drum_kick', 8), ('drum_kick', 9), ('snare', 10),
-                    ('drum_kick', 11), ('drum_kick', 12), ('drum_kick', 13.6), ('snare', 14) 
-                ]
-            }
+            Beat.get_beat_simple(),
+            Beat.get_beat_simple2(),
+            Beat.get_beat_rap()
         ])
+
         # Create an empty bar
         mashup = audio.silent(duration=quarter_duration * accompaniment['length'])
 
         for sample_name, start in accompaniment['rhythm']:
             mashup = mashup.overlay(self.samples[sample_name], position=start*quarter_duration)
 
-        harmony = harmony.overlay(mashup, loop=True)
+        #Reduce mashup volume and overlay
+        mashup = mashup - 12
+        harmony = harmony.overlay(mashup, loop=True, gain_during_overlay=0) 
 
         os.remove(self.wavpath)
-        self.wavpath = filepath + "_orchestra_" + txt_markov + ".wav"
+        self.wavpath = filepath + "_orchestra" + txt_markov + ".wav"
         harmony.export(self.wavpath, format="wav")
         print("Quality music saved to {} ... Enjoy listening !".format(self.wavpath))
 
@@ -365,8 +409,8 @@ class SoundPySynth(object):
 
         return curve, xmins, xmaxs
 
-    def show_graph(self, title=None):
-        plt.figure(figsize=(6, 4))
+    def compute_graph(self, show_graph, title=None):
+        plt.figure(figsize=(6+4, 4+4))
 
         ### Curve plot
         ax = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
@@ -404,7 +448,9 @@ class SoundPySynth(object):
         ax.set_ylabel("dB")
 
         plt.tight_layout()
-        plt.show()
+        plt.savefig(self.wavpath[0:-3]+"png")
+        if show_graph:
+            plt.show()
 
 
 def print_song(song, words, beat_duration):
@@ -449,3 +495,60 @@ def print_time(threadName, delay):
         print ("{}: {}".format( threadName, time.ctime(time.time()) ))
 
 
+class Beat(object):
+    def __init__(self):
+        super(Beat, self).__init__()
+
+    @staticmethod
+    def get_beat_list_by_emotions(emotion):
+        emotion = emotion.lower()
+        if emotion == "positive":
+            pass
+        elif emotion == "negative":
+            pass
+        elif emotion == "trust":
+            pass
+        elif emotion == "fear":
+            pass
+        elif emotion == "joy":
+            pass
+        elif emotion == "anticip":
+            pass
+        elif emotion == "sadness":
+            pass
+        elif emotion == "anger":
+            pass
+        elif emotion == "disgust":
+            pass
+        elif emotion == "surprise":
+            pass
+
+        return []
+
+    @staticmethod
+    def get_beat_simple():
+        res = {
+            'length': 4,
+            'rhythm': [('drum_kick', 0), ('drum_kick', 1), ('snare', 2)]
+        }
+        return res
+
+    @staticmethod
+    def get_beat_simple2():
+        res = {
+                'length': 4,
+                'rhythm': [('drum_kick', 0), ('drum_kick', 2), ('snare', 0), ('snare', 1), ('snare', 3)]
+            }
+        return res
+
+    @staticmethod
+    def get_beat_rap():
+        res = {
+                'length': 16,
+                'rhythm': [
+                    ('drum_kick', 0), ('drum_kick', 1), ('snare', 2), ('drum_kick', 3), ('drum_kick', 4),
+                    ('drum_kick', 5), ('snare', 6), ('drum_kick', 8), ('drum_kick', 9), ('snare', 10),
+                    ('drum_kick', 11), ('drum_kick', 12), ('drum_kick', 13.6), ('snare', 14) 
+                ]
+            }
+        return res
