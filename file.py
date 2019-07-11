@@ -449,7 +449,10 @@ class TextFileToMusic(object):
         self.markov_seed = markovseed
         self.reloadmarkov = reloadmarkov
         self.markov_length = markovgenerationlength
-        return self._get_bpm(), self._get_instrument()
+        _bpm   = self._get_bpm() if bpm == -1 else bpm
+        _instr = self._get_instrument if instrument == "none" else instrument
+        return _bpm, _instr
+
         # if usetitle == True:
         #     return self._get_bpm(), self._get_instrument()
         # else:

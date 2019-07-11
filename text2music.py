@@ -45,15 +45,15 @@ if __name__ == '__main__':
         (
             'b',
             'bpm',
-            180,
-            'The music bpm',
+            -1,
+            'The music bpm, auto-selected if \"-1\"',
             False
         ),
         (
             'i',
             'instrument',
-            'a',
-            'The instrument type: a|b|c|d|e|p|s',
+            'none',
+            'The instrument type: a|b|c|d|e|p|s, auto-selected if \"none\"',
             False
         ),
         (
