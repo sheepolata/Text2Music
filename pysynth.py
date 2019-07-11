@@ -442,6 +442,32 @@ class Beat(object):
         super(Beat, self).__init__()
 
     @staticmethod
+    def get_beat_list_by_emotions(emotion):
+        emotion = emotion.lower()
+        if emotion == "positive":
+            pass
+        elif emotion == "negative":
+            pass
+        elif emotion == "trust":
+            pass
+        elif emotion == "fear":
+            pass
+        elif emotion == "joy":
+            pass
+        elif emotion == "anticip":
+            pass
+        elif emotion == "sadness":
+            pass
+        elif emotion == "anger":
+            pass
+        elif emotion == "disgust":
+            pass
+        elif emotion == "surprise":
+            pass
+
+        return []
+
+    @staticmethod
     def get_beat_simple():
         res = {
             'length': 4,

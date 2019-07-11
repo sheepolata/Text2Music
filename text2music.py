@@ -92,13 +92,6 @@ if __name__ == '__main__':
             False
         ),
         (
-            'ut',
-            'usetitle',
-            False,
-            'Specify if the title/name of the file is used to generate BPM and instrument',
-            True
-        ),
-        (
             'rlm',
             'reloadmarkov',
             False,
