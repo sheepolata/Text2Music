@@ -122,75 +122,111 @@ class SoundPySynth(object):
 
         return tuple(song)
 
-    def generate_song_chain(self, values, length, return_chance=0.00):
+    def generate_song_chain(self, values, length, return_chance=0.35, fval="mean"):
         song = []
 
         duration_index_max = float(len(self.possible_durations) - 1)
         note_index_max     = float(len(self.notes) - 1)
 
-        # print(values)
-        values_min = float(min(values))
-        values_max = float(max(values))
-
         len_min = float(min(length))
         len_max = float(max(length))
 
         current_note_index = np.random.randint(0, len(self.notes))
-        initial_octave = self.octave
+        initial_octave     = self.octave
         initial_note_index = current_note_index
         initial_note       = self.notes[initial_note_index]
-        # print("init", current_note_index)
 
         initial_duration = np.random.choice(self.possible_durations)
 
         song.append((initial_note, initial_duration))
 
-        prev_value = values[0]
-        prev_len   = length[0]
-        for i in range(1, len(values)):
-            # n = int(math.floor((values[i] - values_min)/(values_max - values_min) * note_index_max))
-            curr_value = values[i]
-            curr_len   = length[i]
+        if fval == "spacy":
+            # print(len(values), values)
 
-            value_diff = abs(curr_value - prev_value)
+            for i in range(0, len(values)):
+                _v = values[i]
 
-            sign = 1 if value_diff%2==0 else -1
+                # sign = 1 if _v > 0.35 else -1
+                sign = 1 if _v > 0.4 else -1
 
-            if value_diff <= 3:
-                current_note_index = current_note_index
-            if value_diff <= 7:
-                current_note_index = current_note_index + sign
-            else:
-                current_note_index = current_note_index + sign*2
-
-            if np.random.random() < return_chance:
-                # print("RETURN", i)
-                current_note_index = initial_note_index
-                self.octave = initial_octave
-                self.initialise_notes()
-            elif current_note_index > len(self.notes)-1:
-                if self.octave < self.max_octave:
-                    current_note_index = current_note_index%(len(self.notes)-1)
-                    self.octave += 1
-                    self.initialise_notes()
+                if _v > 0.75:
+                    current_note_index = current_note_index
+                if _v >= 0.25:
+                    current_note_index = current_note_index + sign
                 else:
-                    current_note_index = len(self.notes)-1
-            elif current_note_index < 0:
-                if self.octave > self.min_octave:
-                    current_note_index = len(self.notes)-1 + current_note_index
-                    self.octave -= 1
+                    current_note_index = current_note_index + sign*2
+
+                if i%int(len(values)/10) == 0 and np.random.random() < return_chance:
+                    # print("RETURN", i)
+                    current_note_index = initial_note_index
+                    self.octave = initial_octave
                     self.initialise_notes()
+                elif current_note_index > len(self.notes)-1:
+                    if self.octave < self.max_octave:
+                        current_note_index = current_note_index%(len(self.notes)-1)
+                        self.octave += 1
+                        self.initialise_notes()
+                    else:
+                        current_note_index = len(self.notes)-1
+                elif current_note_index < 0:
+                    if self.octave > self.min_octave:
+                        current_note_index = len(self.notes)-1 + current_note_index
+                        self.octave -= 1
+                        self.initialise_notes()
+                    else:
+                        current_note_index = 0
+
+                l = int(math.floor((length[i] - len_min)/(len_max - len_min) * duration_index_max))
+                
+                song.append((self.notes[current_note_index], self.possible_durations[l]))
+
+        else:
+            prev_value = values[0]
+            prev_len   = length[0]
+            for i in range(1, len(values)):
+                # n = int(math.floor((values[i] - values_min)/(values_max - values_min) * note_index_max))
+                curr_value = values[i]
+                curr_len   = length[i]
+
+                value_diff = abs(curr_value - prev_value)
+
+                sign = 1 if value_diff%2==0 else -1
+
+                if value_diff <= 3:
+                    current_note_index = current_note_index
+                if value_diff <= 7:
+                    current_note_index = current_note_index + sign
                 else:
-                    current_note_index = 0
+                    current_note_index = current_note_index + sign*2
 
-            # print(current_note_index, " ", self.octave)
+                if i%int(len(values)/10) == 0 and np.random.random() < return_chance:
+                    # print("RETURN", i)
+                    current_note_index = initial_note_index
+                    self.octave = initial_octave
+                    self.initialise_notes()
+                elif current_note_index > len(self.notes)-1:
+                    if self.octave < self.max_octave:
+                        current_note_index = current_note_index%(len(self.notes)-1)
+                        self.octave += 1
+                        self.initialise_notes()
+                    else:
+                        current_note_index = len(self.notes)-1
+                elif current_note_index < 0:
+                    if self.octave > self.min_octave:
+                        current_note_index = len(self.notes)-1 + current_note_index
+                        self.octave -= 1
+                        self.initialise_notes()
+                    else:
+                        current_note_index = 0
 
-            l = int(math.floor((length[i] - len_min)/(len_max - len_min) * duration_index_max))
-            
-            song.append((self.notes[current_note_index], self.possible_durations[l]))
+                # print(current_note_index, " ", self.octave)
 
-            prev_value = curr_value
-            prev_len = curr_len
+                l = int(math.floor((length[i] - len_min)/(len_max - len_min) * duration_index_max))
+                
+                song.append((self.notes[current_note_index], self.possible_durations[l]))
+
+                prev_value = curr_value
+                prev_len = curr_len
 
         # for s in song:
         #     print(s)
@@ -217,7 +253,8 @@ class SoundPySynth(object):
         self.used_words = ws
 
         if self.generation_type == "chain":
-            self.song = self.generate_song_chain(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
+            _f = "spacy"
+            self.song = self.generate_song_chain(f.get_words_values(f=_f, words=ws), f.get_duration_factors(f="len", words=ws), fval=_f)
         else:
             self.song = self.generate_song(f.get_words_values(f="mean", words=ws), f.get_duration_factors(f="len", words=ws))
 

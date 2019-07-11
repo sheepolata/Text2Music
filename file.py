@@ -18,7 +18,8 @@ class TextFileToMusic(object):
 
         self.raw_content = self.file.read()
 
-        self.spacy_model = "en_core_web_sm"
+        self.spacy_model = "en_core_web_lg"
+        # self.spacy_model = "en_vectors_web_lg"
 
 
         def load_disp(text):
@@ -114,9 +115,11 @@ class TextFileToMusic(object):
         # self.content = self.content.lower()
 
         self.words = []
+        self.tokens = []
         for tok in self.content:
             if tok.pos_ not in ["SPACE", "PUNCT"]:
-                self.words.append(tok.lemma_)
+                self.words.append(tok.text)
+                self.tokens.append(tok)
                 # print(tok.text, tok.pos_)
         
         t.do_run = False
@@ -348,8 +351,25 @@ class TextFileToMusic(object):
         if words == []:
             words = self.words
         res = []
-        for w in words:
-            res.append(self.get_word_value(w, f))
+        if f == "spacy":
+            for i in range(0, len(self.tokens)-1):
+                tok      = self.tokens[i]
+                next_tok = self.tokens[i+1]
+                if tok.has_vector and next_tok.has_vector:
+                    res.append(tok.similarity(next_tok))
+                    # print(tok.text, next_tok.text, tok.similarity(next_tok))
+                else:
+                    res.append(0.0)
+
+            if self.tokens[-1].has_vector and self.tokens[0].has_vector:
+                res.append(self.tokens[-1].similarity(self.tokens[0]))
+            else:
+                res.append(0.0)
+
+            # print(self.tokens[-1].text, self.tokens[0].text, self.tokens[-1].similarity(self.tokens[0]))
+        else:
+            for w in words:
+                res.append(self.get_word_value(w, f))
         return res
 
     def get_duration_factors(self, f="len", words=[]):
@@ -371,21 +391,6 @@ class TextFileToMusic(object):
         return res
 
     def _get_instrument(self):
-        # instrument = 's'
-
-        # if 'a' in self.title:
-        #     instrument = 'a'
-        # elif 'b' in self.title:
-        #     instrument = 'b'
-        # elif 'c' in self.title:
-        #     instrument = 'c'
-        # elif 'd' in self.title:
-        #     instrument = 'd'
-        # elif 'e' in self.title:
-        #     instrument = 'e'
-        # elif 'p' in self.title:
-        #     instrument = 'p'
-
         instruments = ['a', 'b', 'e', 's']
         d = {'a' : 0, 'b' : 0, 'e' : 0, 's' : 0}
         for c in self.title:
