@@ -314,6 +314,7 @@ class SoundPySynth(object):
             Beat.get_beat_simple(),
             Beat.get_beat_simple2(),
             Beat.get_beat_rap()
+            # Beat.get_beat_test()
         ])
 
         # Create an empty bar
@@ -525,6 +526,27 @@ class Beat(object):
 
         return []
 
+    @staticmethod
+    def get_beat_test():
+        res = {
+            'length': 7*4 - 4,
+            'rhythm':[
+                ('snare_multiple', 0),
+                # ('kick_kick7', 0),
+                ('vocals_long_mod', 2),
+                # ('kick_kick7', 2),
+                # ('vocals_uhh', 4),
+                # ('kick_kick7', 4),
+                # ('kick_kick7', 6),
+                # ('snare', 6),
+                # ('kick_kick7', 8),
+                # ('kick_kick7', 10),
+                # ('snare', 10),
+                # ('kick_kick7', 12),
+                # ('snare', 14),
+            ]
+        }
+        return res
     @staticmethod
     def get_beat_simple():
         res = {
