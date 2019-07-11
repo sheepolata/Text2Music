@@ -28,6 +28,8 @@ from os import path
 import time, _thread
 import platform
 
+# import ValueError
+
 import file
 
 # import pysynth_b as psb # a, b, e, and s variants available
@@ -125,6 +127,10 @@ class SoundPySynth(object):
     def generate_song_chain(self, values, length, return_chance=0.35, fval="mean"):
         song = []
 
+        if len(values) != len(length):
+            # print(len(values), "!=", len(length))
+            raise(ValueError("Error " + str(len(values)) + " != " + str(len(length))))
+
         duration_index_max = float(len(self.possible_durations) - 1)
         note_index_max     = float(len(self.notes) - 1)
 
@@ -144,10 +150,14 @@ class SoundPySynth(object):
             # print(len(values), values)
 
             for i in range(0, len(values)):
-                _v = values[i]
+                _v = values[i][0]
 
                 # sign = 1 if _v > 0.35 else -1
-                sign = 1 if _v > 0.4 else -1
+                # sign = 1 if _v > 0.4 else -1
+                # sign = 1 if np.random.random() > 0.5 else -1
+                
+                positive_pos_ = ["VERB", "NUM", "NOUN", "SYM", "ADP"]
+                sign = 1 if values[i][1] in positive_pos_ else -1
 
                 if _v > 0.75:
                     current_note_index = current_note_index
@@ -262,22 +272,29 @@ class SoundPySynth(object):
         self.wavpath = filepath + "_" + self.generation_type
         if version == "a":
             self.wavpath += "_flute"+txt_markov+".wav"
+            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "b":
             self.wavpath += "_piano"+txt_markov+".wav"
+            psb.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "c":
             self.wavpath += "_bowed"+txt_markov+".wav"
+            psc.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "d":
             self.wavpath += "_woodwind"+txt_markov+".wav"
+            psd.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "e":
             self.wavpath += "_rhodes"+txt_markov+".wav"
+            pse.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "p":
             self.wavpath += "_percs"+txt_markov+".wav"
+            psp.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         elif version == "s":
             self.wavpath += "_strings"+txt_markov+".wav"
+            pss.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         else:
             self.wavpath += txt_markov+".wav"
+            psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         
-        psa.make_wav(self.song, fn = self.wavpath, bpm = self.bpm)
         print('')
 
         return self.wavpath
@@ -305,10 +322,12 @@ class SoundPySynth(object):
         for sample_name, start in accompaniment['rhythm']:
             mashup = mashup.overlay(self.samples[sample_name], position=start*quarter_duration)
 
-        harmony = harmony.overlay(mashup, loop=True)
+        #Reduce mashup volume and overlay
+        mashup = mashup - 12
+        harmony = harmony.overlay(mashup, loop=True, gain_during_overlay=0) 
 
         os.remove(self.wavpath)
-        self.wavpath = filepath + "_orchestra_" + txt_markov + ".wav"
+        self.wavpath = filepath + "_orchestra" + txt_markov + ".wav"
         harmony.export(self.wavpath, format="wav")
         print("Quality music saved to {} ... Enjoy listening !".format(self.wavpath))
 
@@ -390,8 +409,8 @@ class SoundPySynth(object):
 
         return curve, xmins, xmaxs
 
-    def show_graph(self, title=None):
-        plt.figure(figsize=(6, 4))
+    def compute_graph(self, show_graph, title=None):
+        plt.figure(figsize=(6+4, 4+4))
 
         ### Curve plot
         ax = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
@@ -429,7 +448,9 @@ class SoundPySynth(object):
         ax.set_ylabel("dB")
 
         plt.tight_layout()
-        plt.show()
+        plt.savefig(self.wavpath[0:-3]+"png")
+        if show_graph:
+            plt.show()
 
 
 def print_song(song, words, beat_duration):

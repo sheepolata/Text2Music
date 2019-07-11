@@ -4,14 +4,14 @@ from os import path
 
 from pysynth import SoundPySynth
 
-def text_2_music(filepath, octave, generator, markov, plotmusic, **params):
+def text_2_music(filepath, generator, markov, showgraph, **params):
     print("###### Welcome to the TextToMusic Program V2 ######")
     filename = path.splitext(filepath)[0]
     filepath = "./data/" + filepath
     f = file.TextFileToMusic(filepath, filename)
 
     # Get a few parameters that are derived from the title
-    bpm, instrument = f.get_params(**params)
+    bpm, instrument, octave = f.get_params(**params)
 
     output_file = "./output/" + filename
     s = SoundPySynth(octave=octave, bpm=bpm, generation_type=generator)
@@ -19,8 +19,8 @@ def text_2_music(filepath, octave, generator, markov, plotmusic, **params):
     # song = s.generate_wav(f.get_words_values(f="mean"), f.get_duration_factors(f="len"), filepath=output_file+"channel", version=instrument, markov=markov)
     # song = s.generate_wav(f, filepath=output_file, version=instrument, markov=markov)
     song = s.generate_orchestra(f, filepath=output_file, version=instrument, markov=markov)
-    if plotmusic:
-        s.show_graph(filename)
+    
+    s.compute_graph(showgraph, title=filename)
 
 
     # s.playWavWithDispay()
@@ -66,8 +66,8 @@ if __name__ == '__main__':
         (
             'o',
             'octave',
-            4,
-            'The base octave: [2:6]',
+            -1,
+            'The base octave: [2:6], auto-selected if \"-1\"',
             False
         ),
         (
@@ -100,9 +100,9 @@ if __name__ == '__main__':
         ),
         (
             'p',
-            'plotmusic',
+            'showgraph',
             False,
-            'Plot the music',
+            'Show the music graph, also available in the Output folder anytime',
             True
         )
     ]

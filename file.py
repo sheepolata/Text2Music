@@ -21,7 +21,8 @@ class TextFileToMusic(object):
         self.spacy_model = "en_core_web_lg"
         # self.spacy_model = "en_vectors_web_lg"
 
-
+        self.recorded_emotions = ["anger", "anticip", "disgust", "fear", "joy", "negative", "positive", "sadness", "surprise", "trust"]
+        
         def load_disp(text):
             load = ['\\', '|', '/', '-']
             i = 0
@@ -134,6 +135,7 @@ class TextFileToMusic(object):
 
         doc_emotions           = self.content._.emotions
         self.most_repr_emotion = max(doc_emotions.items(), key=operator.itemgetter(1))[0]
+        self.second_most_repr_emotion = [k for k,v in sorted(doc_emotions.items(), key=lambda item: item[1], reverse=True)][1]
         em_max_val             = max(doc_emotions.items(), key=operator.itemgetter(1))[1]
 
         print("\nMost represented emotion in \"{}\" : {} ({}%)".format(self.title, self.most_repr_emotion.upper(), round(em_max_val*100, 2)))
@@ -352,19 +354,30 @@ class TextFileToMusic(object):
             words = self.words
         res = []
         if f == "spacy":
-            for i in range(0, len(self.tokens)-1):
-                tok      = self.tokens[i]
-                next_tok = self.tokens[i+1]
+            spacy_words = ""
+            for w in words:
+                spacy_words += w + " "
+            toks = self.nlp(spacy_words)
+            for i in range(0, len(toks)-1):
+                tok      = toks[i]
+                next_tok = toks[i+1]
                 if tok.has_vector and next_tok.has_vector:
-                    res.append(tok.similarity(next_tok))
+                    # res.append(tok.similarity(next_tok))
+                    v = tok.similarity(next_tok)
                     # print(tok.text, next_tok.text, tok.similarity(next_tok))
                 else:
-                    res.append(0.0)
+                    # res.append(0.0)
+                    v = 0.0
+                res.append([v, tok.pos_])
 
-            if self.tokens[-1].has_vector and self.tokens[0].has_vector:
-                res.append(self.tokens[-1].similarity(self.tokens[0]))
+            if toks[-1].has_vector and toks[0].has_vector:
+                # res.append(toks[-1].similarity(toks[0]))
+                v = toks[-1].similarity(toks[0])
             else:
-                res.append(0.0)
+                # res.append(0.0)
+                v = 0.0
+
+            res.append([v, toks[-1].pos_])
 
             # print(self.tokens[-1].text, self.tokens[0].text, self.tokens[-1].similarity(self.tokens[0]))
         else:
@@ -391,49 +404,87 @@ class TextFileToMusic(object):
         return res
 
     def _get_instrument(self):
-        instruments = ['a', 'b', 'e', 's']
-        d = {'a' : 0, 'b' : 0, 'e' : 0, 's' : 0}
-        for c in self.title:
-            if c in instruments:
-                d[c] += 1
-            else:
-                _diff = []
-                for i in instruments:
-                    _diff.append(abs(ord(i) - ord(c)))
-                d[instruments[_diff.index(min(_diff))]] += 1
-        
-        m = max(d.items(), key=operator.itemgetter(1))[0]
+        # print("Get instrument")
 
-        if d[m] == 0:
-            return np.random.choice(instruments)
-        else:
-            return m
+        # instruments = ['a', 'b', 'e', 's']
+        # d = {'a' : 0, 'b' : 0, 'e' : 0, 's' : 0}
+        # for c in self.title:
+        #     if c in instruments:
+        #         d[c] += 1
+        #     else:
+        #         _diff = []
+        #         for i in instruments:
+        #             _diff.append(abs(ord(i) - ord(c)))
+        #         d[instruments[_diff.index(min(_diff))]] += 1
+        
+        # m = max(d.items(), key=operator.itemgetter(1))[0]
+
+        # if d[m] == 0:
+        #     return np.random.choice(instruments)
+        # else:
+        #     return m
+
+        # ["anger", "anticip", "disgust", "fear", "joy", "negative", "positive", "sadness", "surprise", "trust"]
+
+        if self.most_repr_emotion.lower() in ["joy", "positive", "trust"]:
+            c = np.random.choice(['s', 'e'])
+        elif self.most_repr_emotion.lower() in ["anticip", "surprise"]:
+            c = np.random.choice(['a', 'e'])
+        elif self.most_repr_emotion.lower() in ["disgust", "fear", "negative", "sadness", "anger"]:
+            c = np.random.choice(['a', 'b'])
+        print("Instrument chosen : \"{}\", based on the text most represented emotion ({})".format(c.upper(), self.most_repr_emotion.upper()))
+        return c
         
         # return instrument
+
+    def _get_octave(self):
+        if self.second_most_repr_emotion.lower() in ["joy", "positive", "trust"]:
+            o = 5
+        elif self.second_most_repr_emotion.lower() in ["anticip", "surprise"]:
+            o = 4
+        elif self.second_most_repr_emotion.lower() in ["disgust", "fear", "negative", "sadness", "anger"]:
+            o = 3
+        print("Octave chosen : {}, based on the text second most represented emotion ({})".format(o, self.second_most_repr_emotion.upper()))
+        return o
     
     def _get_bpm(self):
+        if self.most_repr_emotion.lower() in ["joy", "anger"]:
+            b = 240
+        elif self.most_repr_emotion.lower() in ["positive", "trust"]:
+            b = 160
+        elif self.most_repr_emotion.lower() in ["anticip", "surprise"]:
+            b = 200
+        elif self.most_repr_emotion.lower() in ["negative", "sadness"]:
+            b = 120
+        elif self.most_repr_emotion.lower() in ["disgust", "fear"]:
+            b = 220
+        print("BPM chosen : {}, based on the text most represented emotion ({})".format(b, self.most_repr_emotion.upper()))
+        return b
+
+        ###############################################
+        # bpm_range = [140, 240]
+
+        # #Split into words
+        # title_words = self.title.split()
+
+        # if len(title_words) <= 1:
+        #     return np.mean(bpm_range)
+
+        # #Get word mean values
+        # title_words_values = [self.addition(x) for x in title_words]
+        # #Select a random value from title_words_values, seeded by the sum of the word values so the chosen value stays the same for each run
+        # np.random.seed(np.sum(title_words_values))
+        # _value = np.random.choice(title_words_values)
+        # np.random.seed(None)
+
+        # #Normalise the value and select a bmp accordingly
+        # norm = (((_value - min(title_words_values))/(max(title_words_values) - min(title_words_values))))
+        # _bpm = int(bpm_range[0] + norm*(bpm_range[1] - bpm_range[0]))
+
+        # return _bpm
+
+        ###############################################
         # candidates = [120, 150, 180, 210, 240]
-        bpm_range = [140, 240]
-
-        #Split into words
-        title_words = self.title.split()
-
-        if len(title_words) <= 1:
-            return np.mean(bpm_range)
-
-        #Get word mean values
-        title_words_values = [self.addition(x) for x in title_words]
-        #Select a random value from title_words_values, seeded by the sum of the word values so the chosen value stays the same for each run
-        np.random.seed(np.sum(title_words_values))
-        _value = np.random.choice(title_words_values)
-        np.random.seed(None)
-
-        #Normalise the value and select a bmp accordingly
-        norm = (((_value - min(title_words_values))/(max(title_words_values) - min(title_words_values))))
-        _bpm = int(bpm_range[0] + norm*(bpm_range[1] - bpm_range[0]))
-
-        return _bpm
-
         # v = 0
         # chance = .5
         # for c in self.title:
@@ -450,13 +501,15 @@ class TextFileToMusic(object):
         # return int(v)
         # return candidates[len(self.title) % len(candidates)]
 
-    def get_params(self, bpm, instrument, markovgenerationlength, markovseed, reloadmarkov, **_):
+    def get_params(self, bpm, instrument, octave, markovgenerationlength, markovseed, reloadmarkov, **_):
         self.markov_seed = markovseed
         self.reloadmarkov = reloadmarkov
         self.markov_length = markovgenerationlength
         _bpm   = self._get_bpm() if bpm == -1 else bpm
-        _instr = self._get_instrument if instrument == "none" else instrument
-        return _bpm, _instr
+        _instr = self._get_instrument() if instrument == "none" else instrument
+        _octave = self._get_octave() if octave == -1 else octave
+        print('\n')
+        return _bpm, _instr, _octave
 
         # if usetitle == True:
         #     return self._get_bpm(), self._get_instrument()
