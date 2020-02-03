@@ -139,4 +139,6 @@ if __name__ == '__main__':
             except:
                 option_values[fullname] = default_value
 
+        # sys.stdout = open("./data/testlog.txt", "w")
+
         text_2_music(sys.argv[1], **option_values)
