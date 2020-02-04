@@ -37,9 +37,6 @@ class StdoutRedirector(object):
         if not the_string in self.end:
             self.last_print = the_string
             self.last_end_index = self.text_space.index(END)
-        
-        # if self.end != '\n':
-        #     the_string += '\n'
 
         self.text_space.configure(state="normal")
         self.text_space.tag_remove("last_insert", "1.0", "end")
@@ -50,22 +47,10 @@ class StdoutRedirector(object):
         self.text_space.see("end")
         self.text_space.configure(state="disabled")
 
-    # def overwrite(self, the_string):
-    #     self.text_space.configure(state="normal")
-    #     last_insert = self.text_space.tag_ranges("last_insert")
-    #     self.text_space.delete(last_insert[0], last_insert[1])
-    #     self.write(the_string)
-
     def flush(self):
         self.text_space.configure(state="normal")
-        # self.text_space.mark_set(END, "1.0")
         self.text_space.mark_set(END, self.last_end_index)
-        # self.text_space.insert(END, "--"+self.last_print+"--")
-        # self.text_space.delete(END, self.text_space.index(END).split(".")[0]+"."+str(len(self.last_print)))
-        # self.text_space.insert("end", "blahblahblah")
-        # self.text_space.delete(self.last_end_index, END)
         self.text_space.configure(state="disabled")
-        # print(self.text_space.get(1.0, END))
 
 class Lotfi(Entry):
     def __init__(self, master=None, **kwargs):
@@ -165,15 +150,26 @@ class T2M_GUI(Frame):
         tmp_file_list = [str(f) for f in listdir("./data/") if isfile(join("./data", f))]
         file_list = []
         for fstr in tmp_file_list:
-            if fstr[-4:] == ".txt":
+            if fstr[-4:] == ".txt" and fstr != "tmp.txt":
                 file_list.append(fstr)
 
         self.filename_select = ttk.Combobox(self, values=file_list)
         self.ui_elements.append(self.filename_select)
-        
+        self.own_txt_var   = IntVar()
+        self.own_txt_check = Checkbutton(self, text="Using custom text", variable=self.own_txt_var)
+        self.ui_elements.append(self.own_txt_check)
+        self.own_txt_entry = Text(self)
+        self.own_txt_entry.configure(state="disabled")
+        self.ui_elements.append(self.own_txt_entry)
+
+
         self.filename_entry_label.grid(column=_column, row=_row, sticky=W, pady=2)
         _column += 1
         self.filename_select.grid(column=_column, row=_row, sticky=W, pady=2)
+        _column += 1
+        self.own_txt_check.grid(column=_column, row=_row, sticky=W, pady=2)
+        _column += 1
+        self.own_txt_entry_col, self.own_txt_entry_row = _column, _row
 
         self.bpm_var = -1
         self.bpm_label = Label(self, text="BPM (-1=default) ->")
@@ -249,11 +245,14 @@ class T2M_GUI(Frame):
         _column = 0; _row += 1;
         self.display_console = Text(self)
         self.display_console.configure(state="disabled")
-        self.display_console.grid(column=_column, row=_row, columnspan=6, rowspan=3)
+        self.display_console.grid(column=_column, row=_row, columnspan=6, sticky=W+E)
         
-        # self.print_on_console("Console\n")
+        _column = 0; _row += 1;
+        self.working_progressbar = ttk.Progressbar(self, orient=HORIZONTAL, length=100, mode='indeterminate')
+        self._working_progressbar_change = 0
 
         sys.stdout = StdoutRedirector(self.display_console)
+        sys.stderr = sys.stdout
         # self._after_id = self.after(200, self.update)
 
     def update(self):
@@ -261,6 +260,16 @@ class T2M_GUI(Frame):
         self.display_console.update()
         
         if not self.app_running:
+            self.working_progressbar.grid_forget()
+
+            if self.own_txt_var.get() == 1:
+                self.own_txt_entry.configure(state="normal")
+                self.own_txt_entry.grid(column=self.own_txt_entry_col, row=self.own_txt_entry_row, sticky=W+E, pady=2, columnspan=3)
+            else:
+                self.own_txt_entry.delete("1.0", END)
+                self.own_txt_entry.configure(state="disabled")
+                self.own_txt_entry.grid_forget()
+
             if self.markov_var.get() == 1:
                 self.markov_length_entry.configure(state="normal")
                 self.markov_seed_entry.configure(state="normal")
@@ -271,6 +280,13 @@ class T2M_GUI(Frame):
                 self.markov_seed_entry.set(self.markov_seed)
                 self.markov_seed_entry.configure(state="disabled")
                 self.reload_markov_check.configure(state="disabled")
+        else:
+            self.working_progressbar.grid(columnspan=6, sticky=W+E)
+            if self.working_progressbar['value'] >= 100:
+                self._working_progressbar_change = -5
+            elif self.working_progressbar['value'] <= 0:
+                self._working_progressbar_change = 5
+            self.working_progressbar['value'] = self.working_progressbar['value'] + self._working_progressbar_change
 
         # self._after_id = self.after(200, self.update)
 
@@ -281,11 +297,21 @@ class T2M_GUI(Frame):
             super(T2M_GUI, self).destroy()
 
     def run_app(self):
-        if self.filename_select.get() == "":
+        if self.own_txt_var.get() == 0 and self.filename_select.get() == "":
             print("Please select a file",flush=True)
             # print("No Flush")
             # print("Flush",flush=True)
             return
+        elif self.own_txt_var.get() == 1:
+            if self.own_txt_entry.compare("end-1c", "==", "1.0"):
+                print("Please enter some text",flush=True)
+                return
+            else:
+                _txt = self.own_txt_entry.get("1.0", END)
+                if _txt.strip() == "":
+                    print("Please enter some text",flush=True)
+                    return
+
 
         # self.UI.app_running = True
         # for uie in self.UI.ui_elements:
@@ -303,23 +329,13 @@ class T2M_GUI(Frame):
                     "showgraph"              : False
                     }
 
-        # def t2m_tread_target():
-        #     _t = threading.currentThread()
-        #     t2m.text_2_music(
-        #         self.filename_select.get(),
-        #         **option_values
-        #     )
-        #     _t.join()
+        if self.own_txt_var.get() == 1:
+            own_text = self.own_txt_entry.get("1.0", END).strip()
+            self.filename_select.set("tmp.txt")
+            _f = open("./data/"+self.filename_select.get(), "w")
+            _f.write(own_text)
+            _f.close()
 
-        # t = threading.Thread(target=t2m_tread_target)
-        # t.start()
-
-        # t2m.text_2_music(
-        #         self.filename_select.get(),
-        #         **option_values
-        #     )
-
-        # t = RunAppThread(self.filename_select.get(), option_values)
         t = RunAppThread(self, self.filename_select.get(), option_values)
         t.start()
 
