@@ -8,7 +8,7 @@ import sys
 
 import text2music as t2m
 
-import threading
+import threading, time
 
 import myglobals
 
@@ -16,22 +16,56 @@ class StdoutRedirector(object):
     def __init__(self,text_widget):
         self.text_space = text_widget
 
+        self.last_print = ""
+        self.text_space.mark_set(END, "1.0")
+        self.last_end_index = self.text_space.index(END)
         # self.flush = False
 
-    def write(self,string,end="",flush=False):
+        self.end = ['\n', '']
+
+    # def write(self,string,end="",flush=False):
+    #     self.text_space.configure(state="normal")
+    #     # _end = end
+    #     # if len(string) > 0 and string[-1] == '\n':
+    #     #     _end=""
+    #     _end = ""
+    #     self.text_space.insert(END, "{}{}".format(string, _end))
+    #     self.text_space.see(END)
+    #     self.text_space.configure(state="disabled")
+
+    def write(self, the_string):
+        if not the_string in self.end:
+            self.last_print = the_string
+            self.last_end_index = self.text_space.index(END)
+        
+        # if self.end != '\n':
+        #     the_string += '\n'
+
         self.text_space.configure(state="normal")
-        _end = end
-        # if len(string) > 0 and string[-1] == '\n':
-        #     _end=""
-        self.text_space.insert(END, "{}{}".format(string, _end))
-        self.text_space.see(END)
+        self.text_space.tag_remove("last_insert", "1.0", "end")
+
+        self.text_space.delete(END, self.text_space.index(END).split(".")[0]+"."+str(len(self.last_print)))
+
+        self.text_space.insert("end", the_string, "last_insert")
+        self.text_space.see("end")
         self.text_space.configure(state="disabled")
 
+    # def overwrite(self, the_string):
+    #     self.text_space.configure(state="normal")
+    #     last_insert = self.text_space.tag_ranges("last_insert")
+    #     self.text_space.delete(last_insert[0], last_insert[1])
+    #     self.write(the_string)
+
     def flush(self):
-        return
         self.text_space.configure(state="normal")
-        self.text_space.delete(2.0, END)
+        # self.text_space.mark_set(END, "1.0")
+        self.text_space.mark_set(END, self.last_end_index)
+        # self.text_space.insert(END, "--"+self.last_print+"--")
+        # self.text_space.delete(END, self.text_space.index(END).split(".")[0]+"."+str(len(self.last_print)))
+        # self.text_space.insert("end", "blahblahblah")
+        # self.text_space.delete(self.last_end_index, END)
         self.text_space.configure(state="disabled")
+        # print(self.text_space.get(1.0, END))
 
 class Lotfi(Entry):
     def __init__(self, master=None, **kwargs):
@@ -52,14 +86,67 @@ class Lotfi(Entry):
             # there's non-digit characters in the input; reject this 
             self.set(self.old_value)
 
+class RunAppThread(threading.Thread):
+    """docstring for RunAppThread"""
+    def __init__(self, UI, filename, opt):
+        super(RunAppThread, self).__init__()
+        self.UI = UI
+        self.filename = filename
+        self.opt = opt
+        # self.parent = current_thread()
+
+    def start(self):
+        super(RunAppThread, self).start()
+
+    def run(self):
+        self.UI.app_running = True
+        for uie in self.UI.ui_elements:
+            uie.configure(state="disabled")
+
+        # self.UI.run_app()
+        t2m.text_2_music(
+                self.filename,
+                **self.opt
+            )
+
+        self.UI.app_running = False
+        for uie in self.UI.ui_elements:
+            uie.configure(state="normal")
+
+class LoopingThread(threading.Thread):
+    """docstring for LoopingThread"""
+    def __init__(self, target=None, freq=200):
+        super(LoopingThread, self).__init__()
+        self.target = target
+        self.freq = freq
+        self._stop = False
+
+    def run(self):
+        if self.target == None:
+            self.join()
+            return
+
+        while not self._stop:
+            self.target()
+            time.sleep(self.freq/1000.0)
+
+    def stop(self):
+        self._stop = True
+        
+
 class T2M_GUI(Frame):
     """docstring for T2M_GUI"""
     def __init__(self):
         super(T2M_GUI, self).__init__()
 
         self.ui_elements = []
+        self.app_running = False
+
+        self.update_thread = LoopingThread(target=self.update)
 
         self.initUI()
+
+        self.update_thread.start()
         
     def initUI(self):
         self.master.title("Text2Music")
@@ -167,28 +254,42 @@ class T2M_GUI(Frame):
         # self.print_on_console("Console\n")
 
         sys.stdout = StdoutRedirector(self.display_console)
-        self.after(200, self.update)
+        # self._after_id = self.after(200, self.update)
 
     def update(self):
-        # self.print_on_console("etsf")
-        self.display_console.update()
-        if self.markov_var.get() == 1:
-            self.markov_length_entry.configure(state="normal")
-            self.markov_seed_entry.configure(state="normal")
-            self.reload_markov_check.configure(state="normal")
-        else:
-            self.markov_length_entry.set(self.markov_length)
-            self.markov_length_entry.configure(state="disabled")
-            self.markov_seed_entry.set(self.markov_seed)
-            self.markov_seed_entry.configure(state="disabled")
-            self.reload_markov_check.configure(state="disabled")
 
-        self.after(200, self.update)
+        self.display_console.update()
+        
+        if not self.app_running:
+            if self.markov_var.get() == 1:
+                self.markov_length_entry.configure(state="normal")
+                self.markov_seed_entry.configure(state="normal")
+                self.reload_markov_check.configure(state="normal")
+            else:
+                self.markov_length_entry.set(self.markov_length)
+                self.markov_length_entry.configure(state="disabled")
+                self.markov_seed_entry.set(self.markov_seed)
+                self.markov_seed_entry.configure(state="disabled")
+                self.reload_markov_check.configure(state="disabled")
+
+        # self._after_id = self.after(200, self.update)
+
+    def destroy(self):
+        if not self.app_running:
+            # self.after_cancel(self._after_id)
+            self.update_thread.stop()
+            super(T2M_GUI, self).destroy()
 
     def run_app(self):
         if self.filename_select.get() == "":
-            print("Please select a file")
+            print("Please select a file",flush=True)
+            # print("No Flush")
+            # print("Flush",flush=True)
             return
+
+        # self.UI.app_running = True
+        # for uie in self.UI.ui_elements:
+        #     uie.configure(state="disabled")
 
         option_values = {
                     "bpm"                    : int(self.bpm_entry.get()),
@@ -202,26 +303,25 @@ class T2M_GUI(Frame):
                     "showgraph"              : False
                     }
 
-        for uie in self.ui_elements:
-            uie.configure(state="disabled")
+        # def t2m_tread_target():
+        #     _t = threading.currentThread()
+        #     t2m.text_2_music(
+        #         self.filename_select.get(),
+        #         **option_values
+        #     )
+        #     _t.join()
 
-        def t2m_tread_target():
-            _t = threading.currentThread()
-            t2m.text_2_music(
-                self.filename_select.get(),
-                **option_values
-            )
-            _t.join()
+        # t = threading.Thread(target=t2m_tread_target)
+        # t.start()
 
-        t = threading.Thread(target=t2m_tread_target)
-        t.start()
         # t2m.text_2_music(
         #         self.filename_select.get(),
         #         **option_values
         #     )
 
-        for uie in self.ui_elements:
-            uie.configure(state="normal")
+        # t = RunAppThread(self.filename_select.get(), option_values)
+        t = RunAppThread(self, self.filename_select.get(), option_values)
+        t.start()
 
     def print_on_console(self, txt, opt=END):
         self.display_console.configure(state="normal")
@@ -247,4 +347,8 @@ def main():
     main_window.mainloop()
 
 if __name__ == '__main__':
-    main()
+    main_thread = threading.Thread(target=main)
+    main_thread.start()
+    main_thread.join()
+
+    # main()
