@@ -57,6 +57,8 @@ class T2M_GUI(Frame):
     def __init__(self):
         super(T2M_GUI, self).__init__()
 
+        self.ui_elements = []
+
         self.initUI()
         
     def initUI(self):
@@ -80,6 +82,7 @@ class T2M_GUI(Frame):
                 file_list.append(fstr)
 
         self.filename_select = ttk.Combobox(self, values=file_list)
+        self.ui_elements.append(self.filename_select)
         
         self.filename_entry_label.grid(column=_column, row=_row, sticky=W, pady=2)
         _column += 1
@@ -89,25 +92,28 @@ class T2M_GUI(Frame):
         self.bpm_label = Label(self, text="BPM (-1=default) ->")
         self.bpm_entry = ttk.Combobox(self, values=[-1,120, 160, 200, 220, 240])
         self.bpm_entry.set(-1)
+        self.ui_elements.append(self.bpm_entry)
 
-        self.intrument_var = -1
-        self.intrument_label = Label(self, text="Intrument (none=default) ->")
-        self.intrument_entry = ttk.Combobox(self, values=["none","a","b","c","d","e","p","s"])
-        self.intrument_entry.set("none")
+        self.instrument_var = -1
+        self.instrument_label = Label(self, text="Instrument (none=default) ->")
+        self.instrument_entry = ttk.Combobox(self, values=["none","a","b","c","d","e","p","s"])
+        self.instrument_entry.set("none")
+        self.ui_elements.append(self.instrument_entry)
 
         self.octave_var = -1
         self.octave_label = Label(self, text="Octave (-1=default) ->")
         self.octave_entry = ttk.Combobox(self, values=[-1,2,3,4,5,6])
         self.octave_entry.set(-1)
+        self.ui_elements.append(self.octave_entry)
 
         _column = 0; _row += 1;
         self.bpm_label.grid(column=_column, row=_row, sticky=W, pady=2)
         _column += 1;
         self.bpm_entry.grid(column=_column, row=_row, sticky=W, pady=2)
         _column += 1;
-        self.intrument_label.grid(column=_column, row=_row, sticky=W, pady=2)
+        self.instrument_label.grid(column=_column, row=_row, sticky=W, pady=2)
         _column += 1;
-        self.intrument_entry.grid(column=_column, row=_row, sticky=W, pady=2)
+        self.instrument_entry.grid(column=_column, row=_row, sticky=W, pady=2)
         _column += 1;
         self.octave_label.grid(column=_column, row=_row, sticky=W, pady=2)
         _column += 1;
@@ -115,20 +121,24 @@ class T2M_GUI(Frame):
 
         self.markov_var   = IntVar()
         self.markov_check = Checkbutton(self, text="Markov Gen.", variable=self.markov_var)
+        self.ui_elements.append(self.markov_check)
 
         self.markov_length = 100
         self.markov_length_label = Label(self, text="Markov Length ---->")
         self.markov_length_entry = Lotfi(self)
         self.markov_length_entry.configure(state="disabled")
+        self.ui_elements.append(self.markov_length_entry)
 
         self.markov_seed   = -1
         self.markov_seed_label = Label(self, text="Markov seed ---->")
         self.markov_seed_entry = Lotfi(self)
         self.markov_seed_entry.configure(state="disabled")
+        self.ui_elements.append(self.markov_seed_entry)
 
         self.reload_markov_var   = IntVar()
         self.reload_markov_check = Checkbutton(self, text="Reload Markov", variable=self.reload_markov_var)
         self.reload_markov_check.configure(state="disabled")
+        self.ui_elements.append(self.reload_markov_check)
 
         _column = 0; _row += 1;
         self.markov_check.grid(column=_column, row=_row, sticky=W, pady=2)
@@ -144,8 +154,9 @@ class T2M_GUI(Frame):
         self.reload_markov_check.grid(column=_column, row=_row, sticky=W)
 
         _column = 0; _row += 1;
-        self.btn = Button(self, text="Submit", command=self.run_app)
-        self.btn.grid(column=_column, row=_row, columnspan=6)
+        self.submit_button = Button(self, text="Submit", command=self.run_app)
+        self.ui_elements.append(self.submit_button)
+        self.submit_button.grid(column=_column, row=_row, columnspan=6)
 
 
         _column = 0; _row += 1;
@@ -178,10 +189,10 @@ class T2M_GUI(Frame):
         if self.filename_select.get() == "":
             print("Please select a file")
             return
-# {'bpm': -1, 'instrument': 'none', 'generator': 'chain', 'octave': 4, 'markov': True, 'markovgenerationlength': 100, 'markovseed': -1, 'reloadmarkov': False, 'showgraph': False}
+
         option_values = {
                     "bpm"                    : int(self.bpm_entry.get()),
-                    "instrument"             : self.intrument_entry.get(),
+                    "instrument"             : self.instrument_entry.get(),
                     "generator"              : "chain",
                     "octave"                 : int(self.octave_entry.get()),
                     "markov"                 : self.markov_var.get()==1,
@@ -190,6 +201,9 @@ class T2M_GUI(Frame):
                     "reloadmarkov"           : self.reload_markov_var.get()==1,
                     "showgraph"              : False
                     }
+
+        for uie in self.ui_elements:
+            uie.configure(state="disabled")
 
         def t2m_tread_target():
             _t = threading.currentThread()
@@ -205,6 +219,9 @@ class T2M_GUI(Frame):
         #         self.filename_select.get(),
         #         **option_values
         #     )
+
+        for uie in self.ui_elements:
+            uie.configure(state="normal")
 
     def print_on_console(self, txt, opt=END):
         self.display_console.configure(state="normal")

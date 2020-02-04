@@ -109,19 +109,24 @@ class TextFileToMusic(object):
             print("Set Spacy emotion extension ...\r", end='', flush=True)
 
         try:
-            spacy.tokens.Token.set_extension("emotions")
-        except KeyError:
+            spacy.tokens.Token.get_extension("emotions")
+        except (KeyError,AttributeError) as e:
             spacy.tokens.Token.set_extension("emotions", getter=token_emotion_getter)
-            
-        try:
-            spacy.tokens.Doc.set_extension("emotions")
-        except KeyError:
-            spacy.tokens.Doc.set_extension("emotions", getter=docspan_emotion_getter)
 
         try:
-            spacy.tokens.Span.set_extension("emotions")
-        except KeyError:
+            spacy.tokens.Span.get_extension("emotions")
+        except (KeyError,AttributeError) as e:
             spacy.tokens.Span.set_extension("emotions", getter=docspan_emotion_getter)
+        
+        try:
+            spacy.tokens.Doc.get_extension("emotions")
+        except (KeyError,AttributeError) as e:
+            spacy.tokens.Doc.set_extension("emotions", getter=docspan_emotion_getter)
+
+        
+        spacy.tokens.Token.set_extension("emotions", getter=token_emotion_getter)
+        spacy.tokens.Span.set_extension("emotions", getter=docspan_emotion_getter)
+        spacy.tokens.Doc.set_extension("emotions", getter=docspan_emotion_getter)
 
         lim = 1000000
         if len(self.raw_content) > lim:
