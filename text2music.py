@@ -4,7 +4,10 @@ from os import path
 
 from pysynth import SoundPySynth
 
+import myglobals
+
 def text_2_music(filepath, generator, markov, showgraph, **params):
+
     print("###### Welcome to the TextToMusic Program V2 ######")
     filename = path.splitext(filepath)[0]
     filepath = "./data/" + filepath
@@ -140,5 +143,7 @@ if __name__ == '__main__':
                 option_values[fullname] = default_value
 
         # sys.stdout = open("./data/testlog.txt", "w")
+
+        print(option_values)
 
         text_2_music(sys.argv[1], **option_values)

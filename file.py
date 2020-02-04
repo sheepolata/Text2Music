@@ -5,6 +5,7 @@ import json as js
 from pprint import pprint
 import spacy, threading, time
 import collections
+import myglobals
 
 class TextFileToMusic(object):
     """docstring for TextFileToMusic"""
@@ -32,11 +33,15 @@ class TextFileToMusic(object):
                 i = (i+1)%len(load)
                 time.sleep(0.15)
 
-        t = threading.Thread(target=load_disp, args=("Loading Spacy Model {}...".format(self.spacy_model),))
-        t.start()
-        self.nlp = spacy.load(self.spacy_model)
-        t.do_run = False
-        t.join()
+        if not myglobals.RUN_GUI:
+            t = threading.Thread(target=load_disp, args=("Loading Spacy Model {}...".format(self.spacy_model),))
+            t.start()
+            self.nlp = spacy.load(self.spacy_model)
+            t.do_run = False
+            t.join()
+        else:
+            print("Loading Spacy Model {}...\r".format(self.spacy_model), end='', flush=True)
+            self.nlp = spacy.load(self.spacy_model)
         print("Loading Spacy Model {}... done\r".format(self.spacy_model), end='', flush=True)
         print('')
 
@@ -44,11 +49,15 @@ class TextFileToMusic(object):
 
         default_lexicon = "./data/Emoxicon/NRC-Sentiment-Emotion-Lexicons/NRC-Emotion-Lexicon-v0.92/NRC-Emotion-Lexicon-Senselevel-v0.92.txt"
 
-        t = threading.Thread(target=load_disp, args=("Loading Lexicon {}...".format(default_lexicon),))
-        t.start()
-        self.emoxicon = self.loadEmoxicon(default_lexicon)
-        t.do_run = False
-        t.join()
+        if not myglobals.RUN_GUI:
+            t = threading.Thread(target=load_disp, args=("Loading Lexicon {}...".format(default_lexicon),))
+            t.start()
+            self.emoxicon = self.loadEmoxicon(default_lexicon)
+            t.do_run = False
+            t.join()
+        else:
+            print("Loading Lexicon {}...\r".format(default_lexicon), end='', flush=True)
+            self.emoxicon = self.loadEmoxicon(default_lexicon)
         print("Loading Lexicon {}... done\r".format(default_lexicon), end='', flush=True)
         print('')
 
@@ -93,12 +102,26 @@ class TextFileToMusic(object):
                 return res
                     
 
-        t = threading.Thread(target=load_disp, args=("Set Spacy emotion extension ...",))
-        t.start()
+        if not myglobals.RUN_GUI:
+            t = threading.Thread(target=load_disp, args=("Set Spacy emotion extension ...",))
+            t.start()
+        else:
+            print("Set Spacy emotion extension ...\r", end='', flush=True)
 
-        spacy.tokens.Token.set_extension("emotions", getter=token_emotion_getter)
-        spacy.tokens.Doc.set_extension("emotions", getter=docspan_emotion_getter)
-        spacy.tokens.Span.set_extension("emotions", getter=docspan_emotion_getter)
+        try:
+            spacy.tokens.Token.set_extension("emotions")
+        except KeyError:
+            spacy.tokens.Token.set_extension("emotions", getter=token_emotion_getter)
+            
+        try:
+            spacy.tokens.Doc.set_extension("emotions")
+        except KeyError:
+            spacy.tokens.Doc.set_extension("emotions", getter=docspan_emotion_getter)
+
+        try:
+            spacy.tokens.Span.set_extension("emotions")
+        except KeyError:
+            spacy.tokens.Span.set_extension("emotions", getter=docspan_emotion_getter)
 
         lim = 1000000
         if len(self.raw_content) > lim:
@@ -123,8 +146,10 @@ class TextFileToMusic(object):
                 self.tokens.append(tok)
                 # print(tok.text, tok.pos_)
         
-        t.do_run = False
-        t.join()
+        if not myglobals.RUN_GUI:
+            t.do_run = False
+            t.join()
+
         print("Set Spacy emotion extension ... done\r", end='', flush=True)
         print('')
 
