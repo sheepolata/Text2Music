@@ -8,7 +8,7 @@ def main():
     print("###### Welcome to the TextToMusic Program ######")
 
     default_file = "./data/3mt.txt"
-    f = file.TextFileToMusic(default_file)
+    f = file.TextFileToMusic(default_file, "3mt_test")
     s = sound.SoundHandlerFrequences()
     
     print("Playing ===> " + default_file + "...")

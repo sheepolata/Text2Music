@@ -34,11 +34,21 @@ class TextFileToMusic(object):
 
         t = threading.Thread(target=load_disp, args=("Loading Spacy Model {}...".format(self.spacy_model),))
         t.start()
-        self.nlp = spacy.load(self.spacy_model)
-        t.do_run = False
+        failed = False
+        try:
+            self.nlp = spacy.load(self.spacy_model)
+            t.do_run = False
+        except Exception as e:
+            t.do_run = False
+            failed = True
+
         t.join()
         print("Loading Spacy Model {}... done\r".format(self.spacy_model), end='', flush=True)
         print('')
+
+        if failed:
+            print("Loading {} failed!".format(self.spacy_model))
+            return
 
         # self.nlp.max_length = 4500000
 
