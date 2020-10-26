@@ -1,0 +1,701 @@
+{
+    ",": {
+        "a": 1,
+        "aliquet": 1,
+        "bibendum": 2,
+        "blandit": 1,
+        "consectetur": 2,
+        "cursus": 1,
+        "dapibus": 2,
+        "eget": 2,
+        "erat": 1,
+        "et": 1,
+        "eu": 2,
+        "facilisis": 1,
+        "felis": 1,
+        "iaculis": 2,
+        "in": 1,
+        "interdum": 1,
+        "lacinia": 1,
+        "leo": 1,
+        "lobortis": 1,
+        "maximus": 2,
+        "ornare": 1,
+        "pretium": 1,
+        "pulvinar": 1,
+        "sem": 1,
+        "tempus": 1,
+        "tincidunt": 1,
+        "ut": 1,
+        "vel": 1,
+        "vestibulum": 1,
+        "vitae": 1
+    },
+    ".": {
+        "Aenean": 3,
+        "Aliquam": 4,
+        "Cras": 2,
+        "Curabitur": 2,
+        "Donec": 1,
+        "Duis": 2,
+        "Etiam": 2,
+        "Fusce": 2,
+        "In": 2,
+        "Lorem": 1,
+        "Maecenas": 1,
+        "Mauris": 1,
+        "Nam": 4,
+        "Nulla": 6,
+        "Nullam": 3,
+        "Nunc": 2,
+        "Pellentesque": 2,
+        "Phasellus": 1,
+        "Praesent": 5,
+        "Proin": 1,
+        "Quisque": 1,
+        "Sed": 2,
+        "Suspendisse": 3,
+        "Ut": 1,
+        "Vestibulum": 2
+    },
+    "Aenean": {
+        "nec": 1,
+        "tellus": 1,
+        "vulputate": 1
+    },
+    "Aliquam": {
+        "erat": 2,
+        "massa": 1,
+        "turpis": 1
+    },
+    "Cras": {
+        "pharetra": 1,
+        "tincidunt": 1
+    },
+    "Curabitur": {
+        "condimentum": 1,
+        "ex": 1
+    },
+    "Donec": {
+        "fermentum": 1
+    },
+    "Duis": {
+        "eget": 1,
+        "massa": 1
+    },
+    "Etiam": {
+        "commodo": 1,
+        "cursus": 1
+    },
+    "Fusce": {
+        "non": 1,
+        "ut": 1
+    },
+    "In": {
+        "efficitur": 1,
+        "molestie": 1
+    },
+    "Lorem": {
+        "ipsum": 2
+    },
+    "Maecenas": {
+        "a": 1
+    },
+    "Mauris": {
+        "id": 1
+    },
+    "Nam": {
+        "aliquam": 1,
+        "auctor": 1,
+        "enim": 1,
+        "posuere": 1
+    },
+    "Nulla": {
+        "aliquet": 1,
+        "bibendum": 1,
+        "facilisi": 1,
+        "fringilla": 1,
+        "gravida": 1,
+        "id": 1
+    },
+    "Nullam": {
+        "libero": 1,
+        "maximus": 1,
+        "sit": 1
+    },
+    "Nunc": {
+        "fermentum": 1,
+        "non": 1
+    },
+    "Pellentesque": {
+        "eu": 1,
+        "nisi": 1
+    },
+    "Phasellus": {
+        "eget": 1
+    },
+    "Praesent": {
+        "a": 1,
+        "ac": 1,
+        "vel": 2,
+        "vitae": 1
+    },
+    "Proin": {
+        "interdum": 1
+    },
+    "Quisque": {
+        "vestibulum": 1
+    },
+    "Sed": {
+        "condimentum": 1,
+        "facilisis": 1
+    },
+    "Suspendisse": {
+        "aliquam": 1,
+        "placerat": 1,
+        "potenti": 1
+    },
+    "Ut": {
+        "rhoncus": 1
+    },
+    "Vestibulum": {
+        "dignissim": 1,
+        "gravida": 1
+    },
+    "a": {
+        ".": 1,
+        "mauris": 1,
+        "metus": 1,
+        "placerat": 2,
+        "ultrices": 1,
+        "venenatis": 1
+    },
+    "ac": {
+        ",": 3,
+        ".": 2,
+        "felis": 1,
+        "justo": 1,
+        "nunc": 1,
+        "pellentesque": 1,
+        "semper": 1
+    },
+    "accumsan": {
+        "justo": 1
+    },
+    "adipiscing": {
+        "elit": 2
+    },
+    "aliquam": {
+        ",": 2,
+        ".": 1,
+        "tempor": 1,
+        "velit": 1
+    },
+    "aliquet": {
+        "eu": 1,
+        "justo": 1
+    },
+    "amet": {
+        ",": 2,
+        ".": 1,
+        "massa": 1
+    },
+    "ante": {
+        ",": 2,
+        "dictum": 1,
+        "tincidunt": 1
+    },
+    "arcu": {
+        "eu": 1,
+        "non": 1
+    },
+    "at": {
+        ",": 2,
+        "nisl": 1
+    },
+    "auctor": {
+        ",": 2,
+        "elit": 1
+    },
+    "augue": {
+        "et": 1,
+        "nec": 1
+    },
+    "bibendum": {
+        "ante": 1,
+        "massa": 1,
+        "tellus": 1,
+        "vulputate": 1
+    },
+    "blandit": {
+        "ac": 2,
+        "odio": 1,
+        "sem": 1,
+        "tortor": 1
+    },
+    "commodo": {
+        ".": 1,
+        "massa": 1,
+        "purus": 1
+    },
+    "condimentum": {
+        "congue": 1,
+        "ipsum": 1
+    },
+    "congue": {
+        "sem": 1
+    },
+    "consectetur": {
+        "adipiscing": 2,
+        "tellus": 1
+    },
+    "cursus": {
+        "et": 1,
+        "in": 1,
+        "maximus": 1
+    },
+    "dapibus": {
+        "erat": 1,
+        "magna": 1,
+        "mauris": 1,
+        "tortor": 1
+    },
+    "diam": {
+        ".": 1
+    },
+    "dictum": {
+        "dui": 1,
+        "ligula": 1,
+        "ultrices": 1
+    },
+    "dignissim": {
+        "velit": 1
+    },
+    "dolor": {
+        ",": 1,
+        ".": 1,
+        "quis": 1,
+        "rutrum": 1,
+        "sit": 2
+    },
+    "dui": {
+        ",": 1,
+        ".": 1,
+        "blandit": 1
+    },
+    "efficitur": {
+        "feugiat": 1
+    },
+    "eget": {
+        "facilisis": 1,
+        "lobortis": 1,
+        "malesuada": 1,
+        "nibh": 1
+    },
+    "eleifend": {
+        "lorem": 1,
+        "ultrices": 1
+    },
+    "elementum": {
+        ".": 1
+    },
+    "elit": {
+        ",": 1,
+        ".": 4,
+        "auctor": 1
+    },
+    "enim": {
+        "id": 1,
+        "nulla": 1
+    },
+    "erat": {
+        "at": 1,
+        "facilisis": 1,
+        "nisl": 1,
+        "sed": 1,
+        "ullamcorper": 1,
+        "volutpat": 2
+    },
+    "eros": {
+        ".": 3
+    },
+    "est": {
+        ".": 1
+    },
+    "et": {
+        ",": 1,
+        "arcu": 1,
+        "lacinia": 1,
+        "sollicitudin": 1
+    },
+    "eu": {
+        ".": 1,
+        "augue": 1,
+        "dapibus": 1,
+        "elit": 2,
+        "purus": 1,
+        "tempor": 1,
+        "viverra": 1
+    },
+    "ex": {
+        "nibh": 1
+    },
+    "facilisi": {
+        ".": 1
+    },
+    "facilisis": {
+        ".": 1,
+        "ac": 1,
+        "dolor": 1,
+        "feugiat": 1,
+        "lacinia": 1,
+        "quam": 1
+    },
+    "felis": {
+        "a": 1,
+        "laoreet": 1,
+        "nec": 1,
+        "quis": 1
+    },
+    "fermentum": {
+        ".": 1,
+        "blandit": 1,
+        "mattis": 1
+    },
+    "feugiat": {
+        "aliquam": 1,
+        "dolor": 1
+    },
+    "finibus": {
+        "ac": 1,
+        "dolor": 1,
+        "odio": 1
+    },
+    "fringilla": {
+        "erat": 1,
+        "nunc": 1
+    },
+    "gravida": {
+        "enim": 1,
+        "non": 1
+    },
+    "iaculis": {
+        "a": 1,
+        "ante": 1,
+        "at": 1,
+        "finibus": 1
+    },
+    "id": {
+        "eleifend": 1,
+        "erat": 1,
+        "molestie": 1
+    },
+    "in": {
+        ",": 1,
+        "arcu": 1,
+        "malesuada": 1
+    },
+    "interdum": {
+        ".": 1,
+        "non": 1,
+        "orci": 1
+    },
+    "ipsum": {
+        ",": 1,
+        ".": 1,
+        "dolor": 2,
+        "iaculis": 1,
+        "vel": 1
+    },
+    "justo": {
+        ",": 1,
+        ".": 2,
+        "ac": 1,
+        "purus": 1,
+        "vel": 1
+    },
+    "lacinia": {
+        "dapibus": 1,
+        "eros": 1,
+        "molestie": 1
+    },
+    "laoreet": {
+        ",": 1,
+        "eu": 1,
+        "ipsum": 1
+    },
+    "lectus": {
+        ",": 1,
+        "eu": 1
+    },
+    "leo": {
+        "vel": 1
+    },
+    "libero": {
+        "sem": 1
+    },
+    "ligula": {
+        ",": 1,
+        "laoreet": 1
+    },
+    "lobortis": {
+        "auctor": 1,
+        "sem": 1
+    },
+    "lorem": {
+        ".": 1
+    },
+    "magna": {
+        "bibendum": 1,
+        "malesuada": 1,
+        "suscipit": 1
+    },
+    "malesuada": {
+        ".": 1,
+        "ipsum": 1,
+        "justo": 1
+    },
+    "massa": {
+        "a": 1,
+        "ac": 1,
+        "elit": 1,
+        "justo": 1,
+        "quam": 1
+    },
+    "mattis": {
+        ",": 1,
+        "fermentum": 1
+    },
+    "mauris": {
+        ".": 1,
+        "at": 1,
+        "metus": 1
+    },
+    "maximus": {
+        ",": 1,
+        ".": 1,
+        "blandit": 1,
+        "fringilla": 1,
+        "nunc": 1
+    },
+    "metus": {
+        ".": 1,
+        "eu": 1,
+        "tempor": 1,
+        "ut": 1
+    },
+    "molestie": {
+        ".": 1,
+        "mauris": 1,
+        "pellentesque": 1
+    },
+    "mollis": {
+        "pretium": 1
+    },
+    "nec": {
+        ",": 2,
+        "ornare": 1
+    },
+    "nibh": {
+        ",": 1,
+        "ut": 1
+    },
+    "nisi": {
+        "odio": 1
+    },
+    "nisl": {
+        "ac": 1,
+        "iaculis": 1
+    },
+    "non": {
+        ",": 1,
+        "aliquam": 1,
+        "augue": 1,
+        "felis": 1,
+        "tellus": 1
+    },
+    "nulla": {
+        ",": 1
+    },
+    "nunc": {
+        ".": 1,
+        "blandit": 1,
+        "in": 1
+    },
+    "odio": {
+        ",": 1,
+        ".": 2,
+        "ac": 1,
+        "est": 1,
+        "sodales": 1
+    },
+    "orci": {
+        "eros": 1,
+        "facilisis": 1,
+        "lectus": 1
+    },
+    "ornare": {
+        "accumsan": 1,
+        "tortor": 1
+    },
+    "pellentesque": {
+        "commodo": 1,
+        "odio": 1
+    },
+    "pharetra": {
+        ".": 1,
+        "dictum": 1
+    },
+    "placerat": {
+        "aliquam": 1,
+        "diam": 1,
+        "purus": 1
+    },
+    "porta": {
+        ".": 1
+    },
+    "posuere": {
+        "finibus": 1
+    },
+    "potenti": {
+        ".": 1
+    },
+    "pretium": {
+        ".": 2,
+        "dolor": 1,
+        "pretium": 1,
+        "vitae": 1
+    },
+    "pulvinar": {
+        "eleifend": 1,
+        "erat": 1
+    },
+    "purus": {
+        ",": 1,
+        ".": 1,
+        "finibus": 1,
+        "mattis": 1,
+        "mollis": 1
+    },
+    "quam": {
+        ",": 1,
+        "ac": 1
+    },
+    "quis": {
+        "ante": 1,
+        "porta": 1
+    },
+    "rhoncus": {
+        "consectetur": 1
+    },
+    "rutrum": {
+        "sit": 1
+    },
+    "sapien": {
+        "ipsum": 1
+    },
+    "sed": {
+        "venenatis": 1
+    },
+    "sem": {
+        ",": 1,
+        ".": 2,
+        "magna": 1,
+        "varius": 1
+    },
+    "semper": {
+        ".": 1
+    },
+    "sit": {
+        "amet": 4
+    },
+    "sodales": {
+        ",": 1
+    },
+    "sollicitudin": {
+        ".": 1
+    },
+    "suscipit": {
+        "elementum": 1
+    },
+    "tellus": {
+        ".": 2,
+        "et": 1,
+        "ligula": 1
+    },
+    "tempor": {
+        ".": 1,
+        "eros": 1,
+        "interdum": 1
+    },
+    "tempus": {
+        "pretium": 1
+    },
+    "tincidunt": {
+        "a": 1,
+        "pretium": 1,
+        "sapien": 1
+    },
+    "tortor": {
+        ",": 1,
+        ".": 2
+    },
+    "turpis": {
+        "lectus": 1
+    },
+    "ullamcorper": {
+        ",": 1
+    },
+    "ultrices": {
+        ".": 2,
+        "orci": 1
+    },
+    "urna": {
+        ".": 1
+    },
+    "ut": {
+        "ante": 1,
+        "commodo": 1,
+        "laoreet": 1,
+        "magna": 1
+    },
+    "varius": {
+        ".": 1
+    },
+    "vel": {
+        "cursus": 1,
+        "dictum": 1,
+        "maximus": 1,
+        "metus": 1,
+        "odio": 1,
+        "purus": 1
+    },
+    "velit": {
+        ".": 1,
+        "dui": 1
+    },
+    "venenatis": {
+        "pharetra": 1,
+        "urna": 1
+    },
+    "vestibulum": {
+        "facilisis": 1,
+        "volutpat": 1
+    },
+    "vitae": {
+        "felis": 1,
+        "orci": 1,
+        "pulvinar": 1
+    },
+    "viverra": {
+        "dui": 1
+    },
+    "volutpat": {
+        ".": 2,
+        "metus": 1
+    },
+    "vulputate": {
+        "justo": 1,
+        "odio": 1
+    }
+}

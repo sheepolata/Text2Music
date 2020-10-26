@@ -234,27 +234,31 @@ class TextFileToMusic(object):
             
 
             j = 0.0
-            for w in raw_words:
-                print("Fixing Raw content... {0}%\r".format(round(((j/float(len(raw_words)))*100.0), 2)), end='', flush=True)
-                j += 1.0
-                # if any((c in ponct_after) for c in w) and len(w) > 1:
-                if any((c in w) for c in self.ponct_before) and len(w) > 1:
-                    if w[0] not in self.ponct_before:
-                        continue
-                    i = raw_words.index(w)
-                    del raw_words[i]
-                    raw_words.insert(i, w[0])
-                    raw_words.insert(i+1, w[1:])
-                # elif any((c in ponct_before) for c in w) and len(w) > 1:
-                elif any((c in w) for c in self.ponct_after) and len(w) > 1:
-                    if w[-1] not in self.ponct_after:
-                        continue
-                    i = raw_words.index(w)
-                    del raw_words[i]
-                    raw_words.insert(i, w[:-1])
-                    raw_words.insert(i+1, w[-1])
-            print("Fixing Raw content... {0}% - done\r".format(round(((j/float(len(raw_words)))*100.0), 2)), end='', flush=True)
-            print('')
+            try:
+                for w in raw_words:
+                    print("Fixing Raw content... {0}%\r".format(round(((j/float(len(raw_words)))*100.0), 2)), end='', flush=True)
+                    j += 1.0
+                    # if any((c in ponct_after) for c in w) and len(w) > 1:
+                    if any((c in w) for c in self.ponct_before) and len(w) > 1:
+                        if w[0] not in self.ponct_before:
+                            continue
+                        i = raw_words.index(w)
+                        del raw_words[i]
+                        raw_words.insert(i, w[0])
+                        raw_words.insert(i+1, w[1:])
+                    # elif any((c in ponct_before) for c in w) and len(w) > 1:
+                    elif any((c in w) for c in self.ponct_after) and len(w) > 1:
+                        if w[-1] not in self.ponct_after:
+                            continue
+                        i = raw_words.index(w)
+                        del raw_words[i]
+                        raw_words.insert(i, w[:-1])
+                        raw_words.insert(i+1, w[-1])
+                print("Fixing Raw content... {0}% - done\r".format(round(((j/float(len(raw_words)))*100.0), 2)), end='', flush=True)
+                print('')
+            except Exception as e:
+                print(e, "... ERROR")
+
 
             # print(raw_words)
 

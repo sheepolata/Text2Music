@@ -97,6 +97,7 @@ class RunAppThread(threading.Thread):
         self.UI.app_running = False
         for uie in self.UI.ui_elements:
             uie.configure(state="normal")
+        print("done")
 
 class LoopingThread(threading.Thread):
     """docstring for LoopingThread"""
@@ -363,9 +364,9 @@ def main():
     main_window.mainloop()
 
 
-main_thread = threading.Thread(target=main)
-main_thread.start()
-main_thread.join()
+# main_thread = threading.Thread(target=main)
+# main_thread.start()
+# main_thread.join()
 
 if __name__ == '__main__':
     main_thread = threading.Thread(target=main)
