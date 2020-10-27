@@ -166,7 +166,9 @@ class SoundPySynth(object):
                 else:
                     current_note_index = current_note_index + sign*2
 
-                if i%int(len(values)/10) == 0 and np.random.random() < return_chance:
+                mod = int(len(values)/20) if int(len(values)/20) > 0 else 1
+                # if i%int(len(values)/10) == 0 and np.random.random() < return_chance:
+                if i%mod == 0:
                     # print("RETURN", i)
                     current_note_index = initial_note_index
                     self.octave = initial_octave
