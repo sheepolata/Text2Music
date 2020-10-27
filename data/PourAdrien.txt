@@ -1,0 +1,35 @@
+Melee: melee_bonus (melee)
+Ranged: ranged_bonus (ranged)
+CMB: cmb_bonus (CMB)
+Global Attack Mod.: attack_bonus (attack, attacks)
+Global Damage Mod.: damage_bonus (damage)
+Melee Attacks Damage Mod.: melee_damage_bonus (melee damage)
+Ranged Attacks Damage Mod.: ranged_damage_bonus (ranged damage).
+Spell Resistance: sr_bonus (sr, spell resistance, spell_resistance)
+Interpolation de courbe sur 3 points lol
+Pourquoi?
+Pasque je me penche sur ces calculs pour refaire au propre mes trajectoires d'artillerie
+donc je vais faire de mon mieux mais du coup c'est possible que plus tard je te demandrai du temps de cerveau ahahah
+ouais ok
+Niquel chrome
+Ahahahhaaha
+N°2
+Toujours
+Je pense que moi ça me gonflerait
+en tout cas d'avoir ça dans mon groupe
+Déjà parfois de dois avouer que je trouve ça chiant avec juste Ramiel lol
+Ouais je suis dispo la si tu veux
+On pourra audio un peu (quand tu veux) ? j'ai des question pour PF
+Il presente pas mal d'outils que je connaissais pas du tout, surtout le CastleDB qui a l'air sympa !
+Bah en vrai là actuellement je pourrais sans doute plus aider pour les assets art et les brainstorming que pour le codage de base
+Mais oui, si tu vois un gamejam ça me tente
+Apres je crois que ca depend des GameJam
+Mais en general t'es tres libre sur ce que tu utilises
+Ce qui compte c'est qu'a la fin ca fonctionne
+Avec un .exe quoi
+Je sais paaaas du tout comment ça fonctionne en vrai
+Du coup sur le papier carrément
+Je l'installe sur Steam, je pense que ca fonctionnera quand meme avec mon compte
+Bon au pire si ca marche pas, je te filerai mes id ahah
+Nan mais t'inquiete, j'ai mis a dl la deja
+Merci de proposer !

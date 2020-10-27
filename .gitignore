@@ -2,6 +2,7 @@
 *.pyc
 output/*.wav
 output/*.txt
+output/*.rar
 !Example Songs/*
 !data/samples/**/*
 spacy_test.py
